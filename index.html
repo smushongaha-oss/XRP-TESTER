@@ -169,6 +169,11 @@
     </div>
     <div class="call buy" id="call"><span class="call-arrow">▲</span> LONG BIAS</div>
     <div class="call-sub" id="callSub">RSI recovering from oversold · EMA9 crossed above EMA21</div>
+    <div style="display:flex;gap:16px;margin-top:10px;font-family:var(--mono);font-size:11px;position:relative;">
+      <div><span style="color:var(--muted);">ENTRY ~</span><span id="entryVal">—</span></div>
+      <div><span style="color:var(--muted);">TP ~</span><span id="tpVal" style="color:var(--green);">—</span></div>
+      <div><span style="color:var(--muted);">ATR(14) </span><span id="atrVal">—</span></div>
+    </div>
 
     <div class="confidence">
       <div class="confidence-label"><span>MODEL CONFIDENCE</span><span id="confVal">68%</span></div>
@@ -374,12 +379,32 @@ async function fetchKlines(){
   const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=${KLINE_INTERVAL}&limit=${KLINE_LIMIT}`);
   if(!res.ok) throw new Error("klines fetch failed");
   const data = await res.json();
-  return data.map(k => parseFloat(k[4])); // close price of each candle
+  return {
+    closes: data.map(k => parseFloat(k[4])),
+    highs: data.map(k => parseFloat(k[2])),
+    lows: data.map(k => parseFloat(k[3])),
+  };
+}
+
+function atr(highs, lows, closeArr, period=14){
+  if(closeArr.length < period+1) return null;
+  const trs = [];
+  for(let i=1;i<closeArr.length;i++){
+    const tr = Math.max(
+      highs[i]-lows[i],
+      Math.abs(highs[i]-closeArr[i-1]),
+      Math.abs(lows[i]-closeArr[i-1])
+    );
+    trs.push(tr);
+  }
+  const last = trs.slice(-period);
+  return last.reduce((a,b)=>a+b,0)/last.length;
 }
 
 async function refresh(){
   try{
-    const [ticker, closeArr] = await Promise.all([fetchTicker(), fetchKlines()]);
+    const [ticker, klineData] = await Promise.all([fetchTicker(), fetchKlines()]);
+    const { closes: closeArr, highs, lows } = klineData;
     closes = closeArr;
     setStatus('live');
 
@@ -397,6 +422,7 @@ async function refresh(){
 
     const rsiVal = rsi(closes, 14);
     const macdVal = macd(closes);
+    const atrVal = atr(highs, lows, closes, 14);
     if(rsiVal !== null){
       document.getElementById('rsi').textContent = rsiVal.toFixed(1);
     }
@@ -428,6 +454,17 @@ async function refresh(){
         callEl.innerHTML = '<span class="call-arrow">▼</span> SHORT BIAS';
         subEl.textContent = `RSI ${rsiVal.toFixed(1)} · MACD hist ${macdVal.hist.toFixed(4)} (1m candles)`;
       }
+
+      // TP: entry ~ current price, target = ATR(14) x 1.5 in the signal's direction.
+      // This is a volatility-scaled placeholder target, not a guaranteed profit level.
+      if(atrVal !== null){
+        const tp = bullish ? price + atrVal*1.5 : price - atrVal*1.5;
+        document.getElementById('entryVal').textContent = price.toFixed(4);
+        document.getElementById('tpVal').textContent = tp.toFixed(4);
+        document.getElementById('tpVal').style.color = bullish ? "var(--green)" : "var(--red)";
+        document.getElementById('atrVal').textContent = atrVal.toFixed(4);
+      }
+
       if(side !== lastSide){
         pushLog(side, price, conf);
         lastSide = side;
