@@ -2,770 +2,571 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>LEDGER PULSE · XRP Signal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XRP // MATRIX SIGNAL DESK</title>
 <style>
   :root{
-    --bg:#070B0D;
-    --panel:#0E1518;
-    --panel-2:#121B1F;
-    --line:#1D2A2F;
-    --text:#DCE6E8;
-    --muted:#71898F;
-    --cyan:#2FE0D8;
-    --blue:#3B82F6;
-    --amber:#F5A623;
-    --red:#EF5A5A;
-    --green:#3FE07A;
-    --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
-    --sans: 'Inter', -apple-system, sans-serif;
+    --bg:#000000;
+    --panel:rgba(0,20,0,.82);
+    --line:#0f3d0f;
+    --text:#b6ffb6;
+    --mute:#3dff3d;
+    --dim:#1a8f1a;
+    --buy:#00ff66;
+    --sell:#ff3333;
+    --amber:#f5c518;
+    --cyan:#00ff9c;
+    --glow:0 0 8px rgba(0,255,65,.45);
+    --mono:"Courier New", Consolas, "Lucida Console", monospace;
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
-  .wrap{
-    max-width:420px;margin:0 auto;min-height:100vh;
-    background:linear-gradient(180deg,#0A0F11 0%,#070B0D 100%);
-    border-left:1px solid var(--line);border-right:1px solid var(--line);
-    padding-bottom:32px;
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden;}
+  #matrixRain{position:fixed;inset:0;z-index:0;opacity:.22;pointer-events:none;}
+  .shell{position:relative;z-index:1}
+  header{
+    display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:16px 18px 10px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(0,40,0,.55),transparent);
   }
-  .topbar{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:16px 18px 12px;border-bottom:1px solid var(--line);
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{
+    width:40px;height:40px;border:1px solid var(--mute);color:var(--buy);
+    display:grid;place-items:center;font-weight:900;text-shadow:var(--glow);
   }
-  .brand{display:flex;align-items:center;gap:10px;}
-  .brand-mark{
-    width:34px;height:34px;border-radius:9px;
-    background:radial-gradient(circle at 30% 30%, var(--cyan), var(--blue));
-    display:flex;align-items:center;justify-content:center;
-    font-family:var(--mono);font-weight:700;color:#03181A;font-size:13px;
+  h1{font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-shadow:var(--glow)}
+  h1 small{display:block;color:var(--dim);font-size:10px;margin-top:3px;letter-spacing:.08em;text-shadow:none;font-weight:500}
+  .livebox{
+    display:flex;align-items:center;gap:10px;border:1px solid var(--line);
+    background:var(--panel);padding:8px 12px;font-size:12px;
   }
-  .brand-name{font-family:var(--mono);letter-spacing:1.5px;font-size:14px;color:var(--text);}
-  .brand-sub{font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:1px;}
-  .status-pill{
-    font-family:var(--mono);font-size:10px;letter-spacing:1px;
-    padding:5px 9px;border-radius:20px;border:1px solid var(--line);
-    color:var(--green);display:flex;align-items:center;gap:6px;
+  .dot{width:8px;height:8px;border-radius:50%;background:#660000}
+  .dot.on{background:var(--buy);box-shadow:0 0 10px var(--buy)}
+  .px{font-size:18px;font-weight:700;color:var(--buy);text-shadow:var(--glow)}
+  .chg{font-size:11px;padding:2px 8px;border:1px solid var(--line)}
+  .chg.up{color:var(--buy);border-color:var(--buy)}
+  .chg.dn{color:var(--sell);border-color:var(--sell)}
+  .controls{
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+    padding:10px 18px;border-bottom:1px solid var(--line);color:var(--dim);font-size:11px;
   }
-  .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.6s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+  .controls label{display:flex;align-items:center;gap:6px}
+  select,input[type=number]{
+    background:#001a00;color:var(--buy);border:1px solid var(--line);
+    padding:5px 7px;font-family:var(--mono);font-size:11px;
+  }
+  button{
+    background:#001a00;color:var(--buy);border:1px solid var(--mute);
+    padding:5px 12px;cursor:pointer;font-family:var(--mono);font-size:11px;
+    text-transform:uppercase;letter-spacing:.08em;
+  }
+  .layout{display:grid;grid-template-columns:1.7fr .95fr;gap:12px;padding:14px 18px}
+  @media(max-width:1100px){.layout{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);padding:12px}
+  .card.buy{border-color:var(--buy)}
+  .card.sell{border-color:var(--sell)}
+  .card h2{
+    font-size:10px;color:var(--mute);letter-spacing:.18em;margin-bottom:10px;
+    text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:6px;
+  }
+  canvas#canvas{width:100%;height:420px;display:block;background:#000;border:1px solid #062006}
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .m{background:#001400;border:1px solid var(--line);padding:9px}
+  .m span{display:block;color:var(--dim);font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+  .m b{font-size:13px;color:var(--buy)}
 
-  .ticker-row{
-    display:flex;justify-content:space-between;align-items:flex-end;
-    padding:20px 18px 6px;
-  }
-  .pair{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:1px;}
-  .price{font-family:var(--mono);font-size:42px;font-weight:600;color:var(--text);line-height:1;margin-top:4px;}
-  .price .cents{color:var(--muted);font-size:22px;}
-  .chg{font-family:var(--mono);font-size:13px;text-align:right;}
-  .chg.up{color:var(--green);}
-  .chg.down{color:var(--red);}
-  .chg-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+  /* Gauge */
+  .gaugeWrap{display:flex;flex-direction:column;align-items:center;padding:6px 4px 2px}
+  .gaugeLabel{display:flex;justify-content:space-between;width:100%;font-size:9px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+  .gaugeReadout{text-align:center;margin-top:2px}
+  .gaugeReadout .call{font-size:20px;font-weight:900;letter-spacing:.1em;text-shadow:var(--glow)}
+  .gaugeReadout .call.BUY{color:var(--buy)}
+  .gaugeReadout .call.SELL{color:var(--sell)}
+  .gaugeReadout .call.NEUTRAL{color:var(--amber)}
+  .gaugeReadout .score{font-size:10px;color:var(--dim);margin-top:2px}
 
-  .spark{padding:0 18px;margin:10px 0 18px;}
-  .spark svg{width:100%;height:64px;display:block;}
-
-  .divider{height:1px;background:var(--line);margin:0 18px;}
-
-  .signal-card{
-    margin:18px 18px 0;border:1px solid var(--line);border-radius:14px;
-    background:var(--panel);padding:18px;position:relative;overflow:hidden;
-  }
-  .signal-card::before{
-    content:"";position:absolute;inset:0;
-    background:radial-gradient(circle at 90% -10%, rgba(47,224,216,0.08), transparent 60%);
-  }
-  .signal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;position:relative;}
-  .signal-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--muted);}
-  .strategy-tag{
-    font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--cyan);
-    border:1px solid rgba(47,224,216,0.35);padding:4px 8px;border-radius:20px;
-    background:rgba(47,224,216,0.06);
-  }
-  .call{
-    font-family:var(--mono);font-weight:700;font-size:30px;letter-spacing:1px;
-    display:flex;align-items:center;gap:10px;position:relative;
-  }
-  .call.buy{color:var(--green);}
-  .call.sell{color:var(--red);}
-  .call-arrow{font-size:26px;}
-  .call-sub{font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--mono);position:relative;}
-
-  .confidence{margin-top:16px;position:relative;}
-  .confidence-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px;}
-  .meter{height:8px;border-radius:6px;background:#0A1315;overflow:hidden;border:1px solid var(--line);}
-  .meter-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--cyan),var(--green));}
-
-  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:16px 18px 0;}
-  .stat{
-    border:1px solid var(--line);border-radius:10px;background:var(--panel-2);
-    padding:10px 12px;
-  }
-  .stat-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;}
-  .stat-val{font-family:var(--mono);font-size:16px;margin-top:4px;color:var(--text);}
-  .stat-val.pos{color:var(--green);}
-  .stat-val.neg{color:var(--red);}
-
-  .pulse-section{padding:22px 18px 4px;text-align:center;}
-  .pulse-title{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:8px;}
-  .pulse-canvas{width:100%;height:120px;}
-
-  .feed{margin:14px 18px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;}
-  .feed-head{
-    padding:10px 14px;border-bottom:1px solid var(--line);
-    font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1.5px;
-    display:flex;justify-content:space-between;
-  }
-  .feed-item{
-    display:flex;justify-content:space-between;padding:10px 14px;
-    font-family:var(--mono);font-size:11px;border-bottom:1px solid var(--line);
-  }
-  .feed-item:last-child{border-bottom:none;}
-  .feed-tag{color:var(--muted);}
-  .feed-item.buy .feed-side{color:var(--green);}
-  .feed-item.sell .feed-side{color:var(--red);}
-
-  .footnote{
-    margin:18px 18px 0;padding:12px 14px;border:1px dashed var(--line);border-radius:10px;
-    font-size:10.5px;color:var(--muted);line-height:1.5;font-family:var(--sans);
-  }
+  .entry-hero{padding:14px;border:1px solid var(--line);background:#001000;margin-bottom:12px}
+  .dir{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .pill{font-size:12px;font-weight:900;letter-spacing:.14em;padding:6px 10px;border:1px solid var(--dim)}
+  .pill.BUY{color:var(--buy);border-color:var(--buy)}
+  .pill.SELL{color:var(--sell);border-color:var(--sell)}
+  .pill.WAIT,.pill.NO_CHASE{color:var(--dim)}
+  .why{font-size:11px;color:var(--dim);line-height:1.5}
+  .stack{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .kv{background:#000;border:1px solid var(--line);padding:10px}
+  .kv i{display:block;font-style:normal;color:var(--dim);font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+  .kv em{font-style:normal;font-size:17px;font-weight:700}
+  .kv.sl em{color:var(--sell)}
+  .kv.tp em{color:var(--cyan)}
+  .plan{margin-top:12px;font-size:11px;color:var(--dim);line-height:1.55;border:1px dashed var(--line);padding:10px;background:#000}
+  .plan b{color:var(--buy)}
+  .levels{display:flex;flex-direction:column;gap:6px;font-size:11px}
+  .lvl{display:flex;justify-content:space-between;padding:7px 9px;border:1px solid var(--line);background:#000}
+  .lvl.on{border-color:var(--buy);color:var(--buy)}
+  .hist{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow:auto}
+  .row{display:grid;grid-template-columns:64px 1fr auto;gap:8px;padding:8px;border:1px solid var(--line);background:#000;font-size:10px}
+  .row .d.BUY{color:var(--buy)} .row .d.SELL{color:var(--sell)}
+  footer{padding:6px 18px 18px;color:var(--dim);font-size:10px}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <div class="topbar">
-    <div class="brand">
-      <div class="brand-mark">XR</div>
-      <div>
-        <div class="brand-name">LEDGER PULSE</div>
-        <div class="brand-sub">SIGNAL · NOT AUTOTRADE</div>
-      </div>
-    </div>
-    <div class="status-pill" id="statusPill"><span class="dot"></span>CONNECTING</div>
+<canvas id="matrixRain"></canvas>
+<div class="shell">
+<header>
+  <div class="brand">
+    <div class="logo">XR</div>
+    <h1>XRP Matrix Desk<small>// binance spot · xrpusdt · chart + gauge, unified</small></h1>
   </div>
-
-  <div class="ticker-row">
-    <div>
-      <div class="pair">XRP / USDT</div>
-      <div class="price" id="price">2<span class="cents">.4137</span></div>
-    </div>
-    <div>
-      <div class="chg up" id="chg">▲ 1.84%</div>
-      <div class="chg-sub">24H CHANGE</div>
-    </div>
+  <div class="livebox">
+    <span class="dot" id="dot"></span>
+    <span id="statusText">connecting</span>
+    <span class="px" id="price">—</span>
+    <span class="chg" id="chg24">—</span>
   </div>
+</header>
 
-  <div class="spark">
-    <svg viewBox="0 0 400 64" preserveAspectRatio="none">
-      <polyline id="sparkline" fill="none" stroke="#2FE0D8" stroke-width="2" points=""/>
-    </svg>
-  </div>
+<div class="controls">
+  <label>TF
+    <select id="interval">
+      <option value="1m">M1</option>
+      <option value="5m" selected>M5</option>
+      <option value="15m">M15</option>
+      <option value="1h">H1</option>
+      <option value="4h">H4</option>
+      <option value="1d">D1</option>
+    </select>
+  </label>
+  <label>PROJ ×<input id="projMult" type="number" value="2.0" step="0.1" min="1.2" max="4" style="width:58px"></label>
+  <label>CCI<input id="cciThresh" type="number" value="55" step="5" min="20" max="120" style="width:56px"></label>
+  <label>SL BUF<input id="slBuf" type="number" value="1.1" step="0.1" min="0.5" max="3" style="width:52px"></label>
+  <label><input type="checkbox" id="useLevels" checked> SWING LEVELS</label>
+  <button id="btnRefresh">REFRESH</button>
+</div>
 
-  <div class="divider"></div>
-
-  <div class="signal-card">
-    <div class="signal-head">
-      <div class="signal-label">CURRENT SIGNAL</div>
-      <div class="strategy-tag" id="strategy">RSI + MACD · 1m</div>
+<div class="layout">
+  <section class="card" id="chartCard">
+    <h2>// price_stream</h2>
+    <canvas id="canvas" width="1100" height="460"></canvas>
+    <div class="metrics">
+      <div class="m"><span>Zone</span><b id="zone">—</b></div>
+      <div class="m"><span>RSI 14</span><b id="rsi">—</b></div>
+      <div class="m"><span>CCI 14</span><b id="cci">—</b></div>
+      <div class="m"><span>ATR 14</span><b id="atrv">—</b></div>
+      <div class="m"><span>MACD hist</span><b id="macdv">—</b></div>
+      <div class="m"><span>EMA9</span><b id="ema9v">—</b></div>
+      <div class="m"><span>24h Vol</span><b id="volv">—</b></div>
+      <div class="m"><span>Composite</span><b id="compv">—</b></div>
     </div>
-    <div class="call buy" id="call"><span class="call-arrow">▲</span> LONG BIAS</div>
-    <div class="call-sub" id="callSub">RSI recovering from oversold · EMA9 crossed above EMA21</div>
-    <div style="display:flex;gap:16px;margin-top:10px;font-family:var(--mono);font-size:11px;position:relative;">
-      <div><span style="color:var(--muted);">ENTRY ~</span><span id="entryVal">—</span></div>
-      <div><span style="color:var(--muted);">TP ~</span><span id="tpVal" style="color:var(--green);">—</span></div>
-      <div><span style="color:var(--muted);">ATR(14) </span><span id="atrVal">—</span></div>
-    </div>
+  </section>
 
-    <div class="confidence">
-      <div class="confidence-label"><span>MODEL CONFIDENCE</span><span id="confVal">68%</span></div>
-      <div class="meter"><div class="meter-fill" id="confFill" style="width:68%"></div></div>
-    </div>
-  </div>
-
-  <div class="grid">
-    <div class="stat"><div class="stat-label">RSI (14)</div><div class="stat-val" id="rsi">44.2</div></div>
-    <div class="stat"><div class="stat-label">MACD HIST</div><div class="stat-val pos" id="macd">+0.006</div></div>
-    <div class="stat"><div class="stat-label">VOL (1H)</div><div class="stat-val" id="vol">18.4M</div></div>
-  </div>
-
-  <div class="pulse-section">
-    <div class="pulse-title">LEDGER VALIDATION PULSE</div>
-    <canvas class="pulse-canvas" id="pulseCanvas"></canvas>
-  </div>
-
-  <div class="feed">
-    <div class="feed-head"><span>SIGNAL LOG</span><span id="feedTag">LIVE</span></div>
-    <div id="feedList"></div>
-  </div>
-
-  <div class="signal-card" style="margin-top:14px;">
-    <div class="signal-head">
-      <div class="signal-label">STRATEGY BACKTEST · XRP/USDT · 1H CANDLES</div>
-    </div>
-    <button id="runBacktest" style="
-        width:100%;padding:12px;border-radius:10px;border:1px solid rgba(47,224,216,0.35);
-        background:rgba(47,224,216,0.08);color:var(--cyan);font-family:var(--mono);
-        font-size:12px;letter-spacing:1px;cursor:pointer;">RUN BACKTEST (LAST ~500H)</button>
-    <div id="backtestStatus" style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px;"></div>
-
-    <div id="backtestResults" style="display:none;margin-top:14px;">
-      <div class="grid" style="padding:0;grid-template-columns:1fr 1fr;">
-        <div class="stat"><div class="stat-label">BARS ANALYZED</div><div class="stat-val" id="btBars">—</div></div>
-        <div class="stat"><div class="stat-label">POSITION FLIPS</div><div class="stat-val" id="btFlips">—</div></div>
-        <div class="stat"><div class="stat-label">WIN RATE (PER BAR)</div><div class="stat-val" id="btWinrate">—</div></div>
-        <div class="stat"><div class="stat-label">MAX DRAWDOWN</div><div class="stat-val neg" id="btDD">—</div></div>
-        <div class="stat"><div class="stat-label">STRATEGY RETURN</div><div class="stat-val" id="btStratRet">—</div></div>
-        <div class="stat"><div class="stat-label">BUY &amp; HOLD RETURN</div><div class="stat-val" id="btHoldRet">—</div></div>
-      </div>
-      <div class="spark" style="padding:0;margin-top:14px;">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">EQUITY CURVE — STRATEGY (CYAN) VS BUY &amp; HOLD (GREY)</div>
-        <svg viewBox="0 0 400 64" preserveAspectRatio="none">
-          <polyline id="btHoldLine" fill="none" stroke="#3A4750" stroke-width="1.5" points=""/>
-          <polyline id="btStratLine" fill="none" stroke="#2FE0D8" stroke-width="2" points=""/>
-        </svg>
-      </div>
-    </div>
-
-    <div class="footnote" style="margin:14px 0 0;">
-      Always-in-market simulation: every bar is either long or short per the same RSI/MACD rule used above, flipped only on signal change. No fees, slippage, or funding costs included, and this is in-sample (same rule tested on the same data it was eyeballed on) — real trading costs and out-of-sample performance will be worse than this shows. Not a recommendation to trade this strategy.
-    </div>
-  </div>
-
-  <div class="signal-card" style="margin-top:14px;">
-    <div class="signal-head">
-      <div class="signal-label">OUT-OF-SAMPLE VALIDATION</div>
-    </div>
-    <button id="runOOS" style="
-        width:100%;padding:12px;border-radius:10px;border:1px solid rgba(59,130,246,0.35);
-        background:rgba(59,130,246,0.08);color:var(--blue);font-family:var(--mono);
-        font-size:12px;letter-spacing:1px;cursor:pointer;">RUN TRAIN/TEST SPLIT (70/30)</button>
-    <div id="oosStatus" style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px;"></div>
-
-    <div id="oosResults" style="display:none;margin-top:14px;">
-      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;" id="oosThreshold"></div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <div style="font-family:var(--mono);font-size:9px;color:var(--cyan);letter-spacing:1px;margin-bottom:6px;">TRAIN (IN-SAMPLE, TUNED)</div>
-          <div class="stat" style="margin-bottom:6px;"><div class="stat-label">STRATEGY RETURN</div><div class="stat-val" id="oosTrainStrat">—</div></div>
-          <div class="stat" style="margin-bottom:6px;"><div class="stat-label">BUY &amp; HOLD</div><div class="stat-val" id="oosTrainHold">—</div></div>
-          <div class="stat"><div class="stat-label">WIN RATE</div><div class="stat-val" id="oosTrainWin">—</div></div>
-        </div>
-        <div>
-          <div style="font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:1px;margin-bottom:6px;">TEST (OUT-OF-SAMPLE)</div>
-          <div class="stat" style="margin-bottom:6px;"><div class="stat-label">STRATEGY RETURN</div><div class="stat-val" id="oosTestStrat">—</div></div>
-          <div class="stat" style="margin-bottom:6px;"><div class="stat-label">BUY &amp; HOLD</div><div class="stat-val" id="oosTestHold">—</div></div>
-          <div class="stat"><div class="stat-label">WIN RATE</div><div class="stat-val" id="oosTestWin">—</div></div>
+  <aside>
+    <section class="card">
+      <h2>// buy_sell_gauge</h2>
+      <div class="gaugeWrap">
+        <svg id="gaugeSvg" viewBox="0 0 260 150" width="100%" style="max-width:280px"></svg>
+        <div class="gaugeLabel"><span>SELL</span><span>NEUTRAL</span><span>BUY</span></div>
+        <div class="gaugeReadout">
+          <div class="call NEUTRAL" id="gaugeCall">—</div>
+          <div class="score" id="gaugeScore">composite score —</div>
         </div>
       </div>
+    </section>
 
-      <div class="spark" style="padding:0;margin-top:14px;">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">TEST-PERIOD EQUITY — STRATEGY (AMBER) VS BUY &amp; HOLD (GREY)</div>
-        <svg viewBox="0 0 400 64" preserveAspectRatio="none">
-          <polyline id="oosHoldLine" fill="none" stroke="#3A4750" stroke-width="1.5" points=""/>
-          <polyline id="oosStratLine" fill="none" stroke="#F5A623" stroke-width="2" points=""/>
-        </svg>
+    <section class="card" id="entryCard" style="margin-top:12px">
+      <h2>// clear_entry</h2>
+      <div class="entry-hero wait" id="hero">
+        <div class="dir">
+          <span class="pill WAIT" id="pill">WAIT</span>
+          <span id="src" style="font-size:10px;color:var(--dim)">no_setup</span>
+        </div>
+        <div class="why" id="why">Awaiting Trend-Fan break or XRP swing zone…</div>
       </div>
+      <div class="stack">
+        <div class="kv"><i>Entry</i><em id="entry">—</em></div>
+        <div class="kv sl"><i>Stop loss</i><em id="sl">—</em></div>
+        <div class="kv tp"><i>Take profit</i><em id="tp">—</em></div>
+        <div class="kv"><i>R:R / strength</i><em id="rrstr">—</em></div>
+      </div>
+      <div class="plan" id="plan">NO TRADE. Stay flat until BUY or SELL prints.</div>
+    </section>
 
-      <div class="footnote" style="margin:14px 0 0;" id="oosVerdict"></div>
-    </div>
-  </div>
+    <section class="card" style="margin-top:12px">
+      <h2>// swing_map</h2>
+      <div class="levels">
+        <div class="lvl" data-k="inv"><span>INVALIDATION</span><b>1.28</b></div>
+        <div class="lvl" data-k="buy"><span>DIP BUY</span><b>1.35 – 1.39</b></div>
+        <div class="lvl" data-k="bo"><span>BREAKOUT</span><b>1.50</b></div>
+        <div class="lvl" data-k="cf"><span>CONFIRM</span><b>1.55</b></div>
+        <div class="lvl" data-k="t1"><span>TARGET_1</span><b>1.65</b></div>
+        <div class="lvl" data-k="t2"><span>TARGET_2</span><b>1.70</b></div>
+      </div>
+    </section>
 
-  <div class="footnote">
-    Live price and volume from Binance's public market data (XRP/USDT). RSI, MACD and the signal call are computed locally from that data with a simple rules-based model — not a proprietary or verified strategy. Not financial advice. Trading carries risk of loss.
-  </div>
-
+    <section class="card" style="margin-top:12px">
+      <h2>// printed_entries</h2>
+      <div class="hist" id="hist"><div style="color:var(--dim);font-size:11px">NONE_YET</div></div>
+    </section>
+  </aside>
+</div>
+<footer>// MATRIX_THEME · BINANCE_PUBLIC_FEED · EDUCATIONAL_ONLY · NOT FINANCIAL ADVICE</footer>
 </div>
 
 <script>
-// ================== LIVE DATA (Binance public REST API, client-side, no key) ==================
-const SYMBOL = "XRPUSDT";
-const KLINE_INTERVAL = "1m";
-const KLINE_LIMIT = 100;
-const POLL_MS = 15000; // be polite to the public endpoint
+/* ---------------- matrix rain bg ---------------- */
+(function(){
+  const c=document.getElementById('matrixRain'), ctx=c.getContext('2d');
+  let w,h,cols,drops;
+  const chars='アイウエオカキクケコ01XRP$<>/|=*+';
+  function resize(){
+    w=c.width=innerWidth; h=c.height=innerHeight;
+    cols=Math.floor(w/14); drops=Array.from({length:cols},()=>Math.random()*h/14);
+  }
+  addEventListener('resize',resize); resize();
+  (function draw(){
+    ctx.fillStyle='rgba(0,0,0,0.08)'; ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='#00ff41'; ctx.font='13px monospace';
+    for(let i=0;i<drops.length;i++){
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*14,drops[i]*14);
+      if(drops[i]*14>h && Math.random()>0.975) drops[i]=0;
+      drops[i]++;
+    }
+    requestAnimationFrame(draw);
+  })();
+})();
 
-const feedList = document.getElementById('feedList');
-const statusPill = document.getElementById('statusPill');
-let logs = [];
-let lastSide = null;
-let closes = [];
+/* ---------------- state / config ---------------- */
+const SYM='XRPUSDT';
+const REST='https://api.binance.com';
+const WS='wss://stream.binance.com:9443/ws';
+const LEVELS={inv:1.28,buyL:1.35,buyH:1.39,breakout:1.50,confirm:1.55,t1:1.65,t2:1.70};
+const state={candles:[],ema:[],cci:[],atr:[],rsi:[],macdHist:[],signal:null,zoneSig:null,lastPrice:null,history:[],composite:0};
+let klineWs=null,tradeWs=null,tickerWs=null,lastPrintKey='';
+const $=id=>document.getElementById(id);
+const intervalEl=$('interval'), projMultEl=$('projMult'), cciThreshEl=$('cciThresh'), slBufEl=$('slBuf'), useLevelsEl=$('useLevels');
+function fmt(n){if(n==null||!isFinite(n))return '—'; return n>=10?n.toFixed(3):n.toFixed(4)}
 
-function setStatus(state){
-  // state: 'live' | 'connecting' | 'error'
-  if(state === 'live'){
-    statusPill.innerHTML = '<span class="dot"></span>LIVE';
-    statusPill.style.color = 'var(--green)';
-  } else if(state === 'error'){
-    statusPill.innerHTML = '<span class="dot" style="background:var(--red);box-shadow:0 0 8px var(--red)"></span>OFFLINE — RETRYING';
-    statusPill.style.color = 'var(--red)';
-  } else {
-    statusPill.innerHTML = '<span class="dot"></span>CONNECTING';
-    statusPill.style.color = 'var(--amber)';
+/* ---------------- data load / streams ---------------- */
+async function loadHistory(){
+  $('statusText').textContent='loading';
+  try{
+    const res=await fetch(`${REST}/api/v3/klines?symbol=${SYM}&interval=${intervalEl.value}&limit=280`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const raw=await res.json();
+    state.candles=raw.map(k=>({epoch:Math.floor(k[0]/1000),open:+k[1],high:+k[2],low:+k[3],close:+k[4]}));
+    recompute(); connectStreams();
+  }catch(e){
+    $('statusText').textContent='REST_ERROR';
+    setTimeout(loadHistory,5000);
   }
 }
-
-function fmtPrice(v){
-  const s = v.toFixed(4);
-  const [a,b] = s.split(".");
-  document.getElementById('price').innerHTML = a+'<span class="cents">.'+b+'</span>';
-}
-
-function renderSpark(){
-  if(closes.length < 2) return;
-  const pts = closes.slice(-40);
-  const min = Math.min(...pts), max = Math.max(...pts);
-  const coords = pts.map((v,i)=>{
-    const x = (i/(pts.length-1))*400;
-    const y = 60 - ((v-min)/((max-min)||1))*56 - 2;
-    return x+","+y;
-  }).join(" ");
-  document.getElementById('sparkline').setAttribute('points', coords);
-}
-
-// ---- indicator math, computed locally from real candle closes ----
-function ema(values, period){
-  const k = 2/(period+1);
-  let emaArr = [values[0]];
-  for(let i=1;i<values.length;i++){
-    emaArr.push(values[i]*k + emaArr[i-1]*(1-k));
-  }
-  return emaArr;
-}
-
-function rsi(values, period=14){
-  if(values.length < period+1) return null;
-  let gains=0, losses=0;
-  for(let i=values.length-period;i<values.length;i++){
-    const diff = values[i]-values[i-1];
-    if(diff>=0) gains+=diff; else losses-=diff;
-  }
-  const avgGain = gains/period, avgLoss = losses/period;
-  if(avgLoss===0) return 100;
-  const rs = avgGain/avgLoss;
-  return 100 - (100/(1+rs));
-}
-
-function macd(values){
-  if(values.length < 26) return null;
-  const ema12 = ema(values,12);
-  const ema26 = ema(values,26);
-  const macdLine = ema12.map((v,i)=> v - ema26[i]);
-  const signalLine = ema(macdLine.slice(-Math.min(macdLine.length,26)), 9);
-  const hist = macdLine[macdLine.length-1] - signalLine[signalLine.length-1];
-  return { line: macdLine[macdLine.length-1], signal: signalLine[signalLine.length-1], hist };
-}
-
-function pushLog(side, price, conf){
-  const t = new Date().toLocaleTimeString('en-GB', {hour12:false});
-  logs.unshift({t, pair:"XRP/USDT", side, conf: conf+"%"});
-  logs = logs.slice(0,6);
-  feedList.innerHTML = logs.map(l=>{
-    const cls = l.side==="BUY"?"buy":l.side==="SELL"?"sell":"";
-    return `<div class="feed-item ${cls}">
-      <span class="feed-tag">${l.t}</span>
-      <span>${l.pair}</span>
-      <span class="feed-side">${l.side}</span>
-      <span class="feed-tag">${l.conf}</span>
-    </div>`;
-  }).join("");
-}
-
-async function fetchTicker(){
-  const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${SYMBOL}`);
-  if(!res.ok) throw new Error("ticker fetch failed");
-  return res.json();
-}
-
-async function fetchKlines(){
-  const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=${KLINE_INTERVAL}&limit=${KLINE_LIMIT}`);
-  if(!res.ok) throw new Error("klines fetch failed");
-  const data = await res.json();
-  return {
-    closes: data.map(k => parseFloat(k[4])),
-    highs: data.map(k => parseFloat(k[2])),
-    lows: data.map(k => parseFloat(k[3])),
+function closeStreams(){[klineWs,tradeWs,tickerWs].forEach(w=>{try{w&&w.close()}catch(e){}})}
+function connectStreams(){
+  closeStreams();
+  const iv=intervalEl.value;
+  klineWs=new WebSocket(`${WS}/${SYM.toLowerCase()}@kline_${iv}`);
+  klineWs.onopen=()=>{$('dot').classList.add('on');$('statusText').textContent='LIVE_'+iv.toUpperCase()};
+  klineWs.onclose=()=>{$('dot').classList.remove('on');$('statusText').textContent='RECONNECT';setTimeout(()=>{if(!document.hidden)connectStreams()},4000)};
+  klineWs.onmessage=ev=>{
+    const k=JSON.parse(ev.data).k; if(!k) return;
+    const c={epoch:Math.floor(k.t/1000),open:+k.o,high:+k.h,low:+k.l,close:+k.c};
+    const last=state.candles.at(-1);
+    if(last&&last.epoch===c.epoch) state.candles[state.candles.length-1]=c;
+    else {state.candles.push(c); if(state.candles.length>320) state.candles.shift()}
+    state.lastPrice=c.close; $('price').textContent=fmt(c.close); recompute();
+  };
+  tradeWs=new WebSocket(`${WS}/${SYM.toLowerCase()}@aggTrade`);
+  tradeWs.onmessage=ev=>{
+    const p=+JSON.parse(ev.data).p; if(!isFinite(p)) return;
+    state.lastPrice=p; $('price').textContent=fmt(p);
+    if(state.candles.length){const last=state.candles.at(-1); last.close=p; last.high=Math.max(last.high,p); last.low=Math.min(last.low,p)}
+  };
+  tickerWs=new WebSocket(`${WS}/${SYM.toLowerCase()}@ticker`);
+  tickerWs.onmessage=ev=>{
+    const d=JSON.parse(ev.data);
+    const pct=+d.P; const el=$('chg24');
+    el.textContent=(pct>=0?'+':'')+pct.toFixed(2)+'%'; el.className='chg '+(pct>=0?'up':'dn');
+    const vol=+d.v; $('volv').textContent=isFinite(vol)?(vol/1e6).toFixed(1)+'M':'—';
   };
 }
+$('btnRefresh').onclick=()=>{closeStreams(); state.candles=[]; loadHistory()};
+intervalEl.onchange=()=>$('btnRefresh').click();
+useLevelsEl.onchange=()=>recompute();
 
-function atr(highs, lows, closeArr, period=14){
-  if(closeArr.length < period+1) return null;
-  const trs = [];
-  for(let i=1;i<closeArr.length;i++){
-    const tr = Math.max(
-      highs[i]-lows[i],
-      Math.abs(highs[i]-closeArr[i-1]),
-      Math.abs(lows[i]-closeArr[i-1])
-    );
-    trs.push(tr);
-  }
-  const last = trs.slice(-period);
-  return last.reduce((a,b)=>a+b,0)/last.length;
+/* ---------------- indicators ---------------- */
+function ema(v,p){const k=2/(p+1),o=[]; v.forEach((x,i)=>o.push(i===0?x:x*k+o[i-1]*(1-k))); return o}
+function cci(candles,p){
+  const tp=candles.map(c=>(c.high+c.low+c.close)/3), out=Array(candles.length).fill(null);
+  for(let i=p-1;i<candles.length;i++){
+    const s=tp.slice(i-p+1,i+1); const m=s.reduce((a,b)=>a+b,0)/p;
+    const md=s.reduce((a,b)=>a+Math.abs(b-m),0)/p; out[i]=md===0?0:(tp[i]-m)/(0.015*md);
+  } return out;
 }
-
-async function refresh(){
-  try{
-    const [ticker, klineData] = await Promise.all([fetchTicker(), fetchKlines()]);
-    const { closes: closeArr, highs, lows } = klineData;
-    closes = closeArr;
-    setStatus('live');
-
-    const price = parseFloat(ticker.lastPrice);
-    fmtPrice(price);
-    renderSpark();
-
-    const changePct = parseFloat(ticker.priceChangePercent);
-    const chgEl = document.getElementById('chg');
-    chgEl.textContent = (changePct>=0?"▲ ":"▼ ") + Math.abs(changePct).toFixed(2) + "%";
-    chgEl.className = "chg " + (changePct>=0 ? "up" : "down");
-
-    const volM = (parseFloat(ticker.volume)/1e6).toFixed(1)+"M";
-    document.getElementById('vol').textContent = volM;
-
-    const rsiVal = rsi(closes, 14);
-    const macdVal = macd(closes);
-    const atrVal = atr(highs, lows, closes, 14);
-    if(rsiVal !== null){
-      document.getElementById('rsi').textContent = rsiVal.toFixed(1);
-    }
-    let bullish = null;
-    if(macdVal){
-      const macdEl = document.getElementById('macd');
-      macdEl.textContent = (macdVal.hist>=0?"+":"") + macdVal.hist.toFixed(4);
-      macdEl.className = "stat-val " + (macdVal.hist>=0?"pos":"neg");
-      bullish = macdVal.hist >= 0 && rsiVal < 68;
-    }
-
-    if(bullish !== null){
-      // confidence: simple heuristic from distance of RSI from midline + MACD histogram magnitude
-      const rsiScore = Math.min(Math.abs(rsiVal-50)/50, 1);
-      const macdScore = Math.min(Math.abs(macdVal.hist)/ (price*0.002), 1);
-      const conf = Math.round(45 + (rsiScore*0.5 + macdScore*0.5) * 45);
-      document.getElementById('confVal').textContent = conf+"%";
-      document.getElementById('confFill').style.width = conf+"%";
-
-      const callEl = document.getElementById('call');
-      const subEl = document.getElementById('callSub');
-      const side = bullish ? "BUY" : "SELL";
-      if(bullish){
-        callEl.className = "call buy";
-        callEl.innerHTML = '<span class="call-arrow">▲</span> LONG BIAS';
-        subEl.textContent = `RSI ${rsiVal.toFixed(1)} · MACD hist ${macdVal.hist>=0?"+":""}${macdVal.hist.toFixed(4)} (1m candles)`;
-      } else {
-        callEl.className = "call sell";
-        callEl.innerHTML = '<span class="call-arrow">▼</span> SHORT BIAS';
-        subEl.textContent = `RSI ${rsiVal.toFixed(1)} · MACD hist ${macdVal.hist.toFixed(4)} (1m candles)`;
-      }
-
-      // TP: entry ~ current price, target = ATR(14) x 1.5 in the signal's direction.
-      // This is a volatility-scaled placeholder target, not a guaranteed profit level.
-      if(atrVal !== null){
-        const tp = bullish ? price + atrVal*1.5 : price - atrVal*1.5;
-        document.getElementById('entryVal').textContent = price.toFixed(4);
-        document.getElementById('tpVal').textContent = tp.toFixed(4);
-        document.getElementById('tpVal').style.color = bullish ? "var(--green)" : "var(--red)";
-        document.getElementById('atrVal').textContent = atrVal.toFixed(4);
-      }
-
-      if(side !== lastSide){
-        pushLog(side, price, conf);
-        lastSide = side;
-      }
-    }
-  } catch(err){
-    console.error(err);
-    setStatus('error');
-  }
-}
-
-refresh();
-setInterval(refresh, POLL_MS);
-
-// ================== BACKTEST (uses the same rsi/ema/macd functions above) ==================
-async function fetchHistoricalCloses(interval, limit){
-  const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=${interval}&limit=${limit}`);
-  if(!res.ok) throw new Error("historical klines fetch failed");
-  const data = await res.json();
-  return data.map(k => parseFloat(k[4]));
-}
-
-function rollingMacdHist(closeArr){
-  const e12 = ema(closeArr,12);
-  const e26 = ema(closeArr,26);
-  const macdLine = e12.map((v,i)=> v - e26[i]);
-  const signalLine = ema(macdLine,9);
-  return macdLine.map((v,i)=> v - signalLine[i]);
-}
-
-function rollingRsi(closeArr, period=14){
-  const out = new Array(closeArr.length).fill(null);
-  for(let i=period;i<closeArr.length;i++){
-    out[i] = rsi(closeArr.slice(0,i+1), period);
-  }
+function atr(candles,p){
+  const tr=candles.map((c,i)=>i===0?c.high-c.low:Math.max(c.high-c.low,Math.abs(c.high-candles[i-1].close),Math.abs(c.low-candles[i-1].close)));
+  const out=Array(candles.length).fill(null);
+  for(let i=p-1;i<candles.length;i++) out[i]=tr.slice(i-p+1,i+1).reduce((a,b)=>a+b,0)/p;
   return out;
 }
-
-function runBacktest(closeArr){
-  const histArr = rollingMacdHist(closeArr);
-  const rsiArr = rollingRsi(closeArr, 14);
-
-  const start = 26; // MACD warmup
-  let position = null; // true = long, false = short
-  let flips = 0;
-  let wins = 0, total = 0;
-  let equity = 1, holdEquity = 1;
-  let peak = 1, maxDD = 0;
-  const equityCurve = [1];
-  const holdCurve = [1];
-
-  for(let i=start; i<closeArr.length-1; i++){
-    const rsiVal = rsiArr[i];
-    const hist = histArr[i];
-    if(rsiVal === null || hist === undefined) continue;
-
-    const bullish = hist >= 0 && rsiVal < 68;
-    if(position !== null && bullish !== position) flips++;
-    position = bullish;
-
-    const barRet = (closeArr[i+1]-closeArr[i]) / closeArr[i];
-    const stratRet = position ? barRet : -barRet;
-
-    equity *= (1+stratRet);
-    holdEquity *= (1+barRet);
-    equityCurve.push(equity);
-    holdCurve.push(holdEquity);
-
-    if(stratRet > 0) wins++;
-    total++;
-
-    peak = Math.max(peak, equity);
-    const dd = (peak-equity)/peak;
-    maxDD = Math.max(maxDD, dd);
+function rsi(closes,p){
+  const out=Array(closes.length).fill(null); if(closes.length<p+1) return out;
+  let g=0,l=0; for(let i=1;i<=p;i++){const d=closes[i]-closes[i-1]; if(d>=0)g+=d; else l-=d}
+  let ag=g/p,al=l/p; out[p]=al===0?100:100-(100/(1+ag/al));
+  for(let i=p+1;i<closes.length;i++){
+    const d=closes[i]-closes[i-1]; ag=(ag*(p-1)+(d>0?d:0))/p; al=(al*(p-1)+(d<0?-d:0))/p;
+    out[i]=al===0?100:100-(100/(1+ag/al));
+  } return out;
+}
+function macdHistSeries(closes){
+  if(closes.length<26) return Array(closes.length).fill(null);
+  const e12=ema(closes,12), e26=ema(closes,26);
+  const macdLine=e12.map((v,i)=>v-e26[i]);
+  const sig=ema(macdLine,9);
+  return macdLine.map((v,i)=>v-sig[i]);
+}
+function findPivots(emaArr,lb,minBars,minSize){
+  const highs=[],lows=[];
+  for(let i=lb;i<emaArr.length-lb;i++){
+    const w=emaArr.slice(i-lb,i+lb+1);
+    if(emaArr[i]===Math.max(...w)) highs.push({index:i,price:emaArr[i]});
+    if(emaArr[i]===Math.min(...w)) lows.push({index:i,price:emaArr[i]});
   }
-
-  return {
-    bars: total,
-    flips,
-    winRate: total ? (wins/total*100) : 0,
-    stratReturn: (equity-1)*100,
-    holdReturn: (holdEquity-1)*100,
-    maxDD: maxDD*100,
-    equityCurve,
-    holdCurve
-  };
+  const clean=arr=>{if(arr.length<2)return arr; const o=[arr[0]]; for(let i=1;i<arr.length;i++){const p=o.at(-1); if(arr[i].index-p.index>=minBars && Math.abs(arr[i].price-p.price)>=minSize) o.push(arr[i])} return o};
+  return {highs:clean(highs),lows:clean(lows)};
+}
+function xrpZone(price,rsiV){
+  const L=LEVELS;
+  if(price<L.inv) return {code:'EXIT',text:'Lost 1.28 structure.'};
+  if(rsiV!=null && rsiV>=70 && price>=L.breakout) return {code:'NO_CHASE',text:'Overbought. Do not buy strength.'};
+  if(price>=L.confirm) return {code:'BUY_BREAK',text:'Confirmed above 1.55.'};
+  if(price>=L.breakout) return {code:'WATCH_BO',text:'Testing 1.50.'};
+  if(price>=L.buyL && price<=L.buyH) return {code:'BUY_DIP',text:'Dip-buy pocket 1.35–1.39.'};
+  if(price<L.buyL) return {code:'WAIT_FLOOR',text:'Between 1.28 and 1.35.'};
+  return {code:'MID',text:'Mid-range. No forced trade.'};
 }
 
-function curveToPoints(curve){
-  const min = Math.min(...curve), max = Math.max(...curve);
-  return curve.map((v,i)=>{
-    const x = (i/(curve.length-1))*400;
-    const y = 60 - ((v-min)/((max-min)||1))*56 - 2;
-    return x+","+y;
-  }).join(" ");
+/* ---------------- composite gauge score (-100 sell .. +100 buy) ---------------- */
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function computeComposite(lastRsi,lastCci,lastMacdHist,atrVal){
+  const rsiScore = lastRsi!=null ? clamp((lastRsi-50)*2.2, -100,100) : 0;
+  const cciScore = lastCci!=null ? clamp(lastCci*0.55, -100,100) : 0;
+  const macdScore = (lastMacdHist!=null && atrVal) ? clamp((lastMacdHist/(atrVal*0.6))*100, -100,100) : 0;
+  return Math.round(rsiScore*0.4 + cciScore*0.35 + macdScore*0.25);
 }
 
-document.getElementById('runBacktest').addEventListener('click', async ()=>{
-  const btn = document.getElementById('runBacktest');
-  const statusEl = document.getElementById('backtestStatus');
-  btn.disabled = true;
-  btn.style.opacity = 0.6;
-  statusEl.textContent = "Fetching ~500 hourly candles from Binance…";
-  try{
-    const hist = await fetchHistoricalCloses("1h", 500);
-    statusEl.textContent = "Running simulation…";
-    const result = runBacktest(hist);
-
-    document.getElementById('btBars').textContent = result.bars;
-    document.getElementById('btFlips').textContent = result.flips;
-    document.getElementById('btWinrate').textContent = result.winRate.toFixed(1)+"%";
-    document.getElementById('btDD').textContent = "-"+result.maxDD.toFixed(1)+"%";
-
-    const stratEl = document.getElementById('btStratRet');
-    stratEl.textContent = (result.stratReturn>=0?"+":"")+result.stratReturn.toFixed(1)+"%";
-    stratEl.className = "stat-val " + (result.stratReturn>=0?"pos":"neg");
-
-    const holdEl = document.getElementById('btHoldRet');
-    holdEl.textContent = (result.holdReturn>=0?"+":"")+result.holdReturn.toFixed(1)+"%";
-    holdEl.className = "stat-val " + (result.holdReturn>=0?"pos":"neg");
-
-    document.getElementById('btStratLine').setAttribute('points', curveToPoints(result.equityCurve));
-    document.getElementById('btHoldLine').setAttribute('points', curveToPoints(result.holdCurve));
-
-    document.getElementById('backtestResults').style.display = 'block';
-    statusEl.textContent = `Done — ${result.bars} hourly bars, ${result.flips} position flips.`;
-  } catch(err){
-    console.error(err);
-    statusEl.textContent = "Backtest failed — Binance API unreachable. Try again.";
-  } finally {
-    btn.disabled = false;
-    btn.style.opacity = 1;
-  }
-});
-
-// ================== OUT-OF-SAMPLE TRAIN/TEST SPLIT ==================
-// Same rule as above, but the RSI overbought threshold (default 68) is swept and
-// picked on the TRAIN slice only, then applied unchanged to the untouched TEST slice.
-function runBacktestWithThreshold(closeArr, rsiArr, histArr, startIdx, endIdxExclusive, threshold){
-  let position = null;
-  let wins = 0, total = 0;
-  let equity = 1, holdEquity = 1;
-  let peak = 1, maxDD = 0;
-  const equityCurve = [1];
-  const holdCurve = [1];
-
-  for(let i=startIdx; i<endIdxExclusive-1; i++){
-    const rsiVal = rsiArr[i];
-    const hist = histArr[i];
-    if(rsiVal === null || hist === undefined) continue;
-
-    const bullish = hist >= 0 && rsiVal < threshold;
-    position = bullish;
-
-    const barRet = (closeArr[i+1]-closeArr[i]) / closeArr[i];
-    const stratRet = position ? barRet : -barRet;
-
-    equity *= (1+stratRet);
-    holdEquity *= (1+barRet);
-    equityCurve.push(equity);
-    holdCurve.push(holdEquity);
-
-    if(stratRet > 0) wins++;
-    total++;
-
-    peak = Math.max(peak, equity);
-    maxDD = Math.max(maxDD, (peak-equity)/peak);
-  }
-
-  return { bars: total, winRate: total ? wins/total*100 : 0, stratReturn: (equity-1)*100, holdReturn: (holdEquity-1)*100, maxDD: maxDD*100, equityCurve, holdCurve };
-}
-
-document.getElementById('runOOS').addEventListener('click', async ()=>{
-  const btn = document.getElementById('runOOS');
-  const statusEl = document.getElementById('oosStatus');
-  btn.disabled = true;
-  btn.style.opacity = 0.6;
-  statusEl.textContent = "Fetching ~700 hourly candles from Binance…";
-  try{
-    const hist = await fetchHistoricalCloses("1h", 700);
-    statusEl.textContent = "Sweeping threshold on train slice…";
-
-    const histArr = rollingMacdHist(hist);
-    const rsiArr = rollingRsi(hist, 14);
-
-    const splitIdx = Math.floor(hist.length * 0.7);
-    const warmup = 26;
-
-    // Sweep RSI overbought threshold 55–80 on TRAIN slice only, pick best by strategy return
-    let bestThreshold = 68, bestReturn = -Infinity;
-    for(let th=55; th<=80; th++){
-      const r = runBacktestWithThreshold(hist, rsiArr, histArr, warmup, splitIdx, th);
-      if(r.stratReturn > bestReturn){ bestReturn = r.stratReturn; bestThreshold = th; }
+/* ---------------- main recompute ---------------- */
+function recompute(){
+  if(state.candles.length<70) return;
+  const closes=state.candles.map(c=>c.close);
+  state.ema=ema(closes,9); state.cci=cci(state.candles,14); state.atr=atr(state.candles,14); state.rsi=rsi(closes,14);
+  state.macdHist=macdHistSeries(closes);
+  const i=closes.length-1, px=closes[i], lastCci=state.cci[i], lastAtr=state.atr[i]||0, lastRsi=state.rsi[i], lastMacdHist=state.macdHist[i];
+  if(!lastAtr) return;
+  const proj=+projMultEl.value, thr=+cciThreshEl.value, slBuf=+slBufEl.value;
+  const iv=intervalEl.value, minBars=(iv==='1m'||iv==='5m')?5:4, minSize=lastAtr*((iv==='1m'||iv==='5m')?0.40:0.35);
+  const {highs,lows}=findPivots(state.ema,4,minBars,minSize);
+  let signal=null;
+  if(highs.length>=2){
+    const p2=highs.at(-1), p1=highs.at(-2);
+    if(p2.price<p1.price){
+      const age=i-p2.index, broke=(age<=4 && px<p2.price), fresh=closes[i-1]>=p2.price && px<p2.price;
+      if((broke||fresh) && lastCci!=null && lastCci<-thr){
+        const slope=(p2.price-p1.price)/(p2.index-p1.index), dist=p2.index-p1.index, projI=p2.index+proj*dist;
+        const tp=p2.price+slope*(projI-p2.index), sl=Math.max(p2.price,p1.price)+slBuf*lastAtr;
+        const risk=sl-px, reward=px-tp, rr=risk>0?reward/risk:0;
+        if(tp<px && rr>=1.2){
+          const st=Math.min(100,Math.round((Math.abs(lastCci)/thr)*35+Math.min(rr,3)*18+(age<=2?20:10)));
+          if(st>=48) signal={dir:'SELL',entry:px,sl,tp,p1,p2,projIndex:projI,rr,strength:st,source:'Trend-Fan'};
+        }
+      }
     }
-
-    const trainResult = runBacktestWithThreshold(hist, rsiArr, histArr, warmup, splitIdx, bestThreshold);
-    const testResult  = runBacktestWithThreshold(hist, rsiArr, histArr, splitIdx, hist.length, bestThreshold);
-
-    document.getElementById('oosThreshold').textContent =
-      `Best RSI threshold on TRAIN: ${bestThreshold} · Train bars: ${trainResult.bars} · Test bars: ${testResult.bars} (unseen, same threshold)`;
-
-    document.getElementById('oosTrainStrat').textContent = (trainResult.stratReturn>=0?"+":"")+trainResult.stratReturn.toFixed(1)+"%";
-    document.getElementById('oosTrainStrat').className = "stat-val " + (trainResult.stratReturn>=0?"pos":"neg");
-    document.getElementById('oosTrainHold').textContent = (trainResult.holdReturn>=0?"+":"")+trainResult.holdReturn.toFixed(1)+"%";
-    document.getElementById('oosTrainWin').textContent = trainResult.winRate.toFixed(1)+"%";
-
-    document.getElementById('oosTestStrat').textContent = (testResult.stratReturn>=0?"+":"")+testResult.stratReturn.toFixed(1)+"%";
-    document.getElementById('oosTestStrat').className = "stat-val " + (testResult.stratReturn>=0?"pos":"neg");
-    document.getElementById('oosTestHold').textContent = (testResult.holdReturn>=0?"+":"")+testResult.holdReturn.toFixed(1)+"%";
-    document.getElementById('oosTestWin').textContent = testResult.winRate.toFixed(1)+"%";
-
-    document.getElementById('oosStratLine').setAttribute('points', curveToPoints(testResult.equityCurve));
-    document.getElementById('oosHoldLine').setAttribute('points', curveToPoints(testResult.holdCurve));
-
-    const beat = testResult.stratReturn > testResult.holdReturn;
-    const verdictEl = document.getElementById('oosVerdict');
-    verdictEl.textContent = beat
-      ? `On this unseen test window, the strategy (+${testResult.stratReturn.toFixed(1)}%) outperformed buy-and-hold (${testResult.holdReturn>=0?"+":""}${testResult.holdReturn.toFixed(1)}%). One test window is not proof of an edge — the threshold was optimized on adjacent data, and crypto regimes shift.`
-      : `On this unseen test window, the strategy (${testResult.stratReturn>=0?"+":""}${testResult.stratReturn.toFixed(1)}%) did not beat buy-and-hold (${testResult.holdReturn>=0?"+":""}${testResult.holdReturn.toFixed(1)}%). This is the more common outcome for simple indicator rules once they're tested outside the data they were tuned on.`;
-
-    document.getElementById('oosResults').style.display = 'block';
-    statusEl.textContent = "Done.";
-  } catch(err){
-    console.error(err);
-    statusEl.textContent = "Out-of-sample test failed — Binance API unreachable. Try again.";
-  } finally {
-    btn.disabled = false;
-    btn.style.opacity = 1;
   }
-});
+  if(!signal && lows.length>=2){
+    const p2=lows.at(-1), p1=lows.at(-2);
+    if(p2.price>p1.price){
+      const age=i-p2.index, broke=(age<=4 && px>p2.price), fresh=closes[i-1]<=p2.price && px>p2.price;
+      if((broke||fresh) && lastCci!=null && lastCci>thr){
+        const slope=(p2.price-p1.price)/(p2.index-p1.index), dist=p2.index-p1.index, projI=p2.index+proj*dist;
+        const tp=p2.price+slope*(projI-p2.index), sl=Math.min(p2.price,p1.price)-slBuf*lastAtr;
+        const risk=px-sl, reward=tp-px, rr=risk>0?reward/risk:0;
+        if(tp>px && rr>=1.2){
+          const st=Math.min(100,Math.round((Math.abs(lastCci)/thr)*35+Math.min(rr,3)*18+(age<=2?20:10)));
+          if(st>=48) signal={dir:'BUY',entry:px,sl,tp,p1,p2,projIndex:projI,rr,strength:st,source:'Trend-Fan'};
+        }
+      }
+    }
+  }
+  const zone=xrpZone(px,lastRsi); state.zoneSig=zone;
+  if(useLevelsEl.checked){
+    if(zone.code==='EXIT'){
+      signal={dir:'SELL',entry:px,sl:px+1.2*lastAtr,tp:LEVELS.inv-lastAtr,p1:{index:i-5,price:px},p2:{index:i,price:px},projIndex:i+8,rr:1.5,strength:70,source:'XRP invalidation'};
+    } else if(zone.code==='NO_CHASE' && (!signal || signal.dir==='BUY')){
+      signal=null;
+    } else if(zone.code==='BUY_DIP' && !signal){
+      const sl=Math.min(LEVELS.inv, px-slBuf*lastAtr);
+      signal={dir:'BUY',entry:px,sl,tp:LEVELS.breakout,p1:{index:i-8,price:LEVELS.buyL},p2:{index:i,price:px},projIndex:i+12,rr:(LEVELS.breakout-px)/Math.max(1e-9,px-sl),strength:62,source:'XRP dip zone'};
+    } else if(zone.code==='BUY_BREAK' && !signal){
+      const sl=LEVELS.breakout-0.5*lastAtr;
+      signal={dir:'BUY',entry:px,sl,tp:LEVELS.t1,p1:{index:i-6,price:LEVELS.breakout},p2:{index:i,price:px},projIndex:i+10,rr:(LEVELS.t1-px)/Math.max(1e-9,px-sl),strength:68,source:'XRP breakout'};
+    }
+  }
+  state.signal=signal;
+  state.composite=computeComposite(lastRsi,lastCci,lastMacdHist,lastAtr);
 
-
-
-// ---- ledger pulse canvas (ambient, unrelated to price data) ----
-const canvas = document.getElementById('pulseCanvas');
-const ctx = canvas.getContext('2d');
-function resize(){
-  canvas.width = canvas.clientWidth * devicePixelRatio;
-  canvas.height = canvas.clientHeight * devicePixelRatio;
+  if(signal){
+    const key=signal.dir+'|'+signal.source+'|'+intervalEl.value+'|'+Math.round(signal.entry*1000);
+    if(key!==lastPrintKey){
+      lastPrintKey=key;
+      state.history.unshift({t:new Date().toLocaleTimeString(),dir:signal.dir,entry:signal.entry,sl:signal.sl,tp:signal.tp,src:signal.source});
+      state.history=state.history.slice(0,12);
+    }
+  }
+  render();
 }
-resize();
-window.addEventListener('resize', resize);
 
-let t = 0;
-function drawPulse(){
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0,0,w,h);
+/* ---------------- gauge SVG ---------------- */
+function buildGaugeStatic(){
+  const svg=$('gaugeSvg');
+  const cx=130, cy=130, r=105;
+  const arc=(a0,a1,color,w)=>{
+    const p0={x:cx+r*Math.cos(a0),y:cy+r*Math.sin(a0)};
+    const p1={x:cx+r*Math.cos(a1),y:cy+r*Math.sin(a1)};
+    const large = (a1-a0) > Math.PI ? 1:0;
+    return `<path d="M ${p0.x} ${p0.y} A ${r} ${r} 0 ${large} 1 ${p1.x} ${p1.y}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>`;
+  };
+  const PI=Math.PI;
+  const start=PI, end=2*PI; // semicircle top half (180deg to 360deg maps left to right)
+  const seg=(end-start)/5;
+  const colors=['#ff3333','#ff8b3d','#f5c518','#7bdc4a','#00ff66'];
+  let bands='';
+  for(let s=0;s<5;s++){
+    bands+=arc(start+seg*s, start+seg*(s+1), colors[s], 14);
+  }
+  // tick labels
+  const ticks=[-100,-50,0,50,100];
+  let ticksSvg='';
+  ticks.forEach(t=>{
+    const a=start + ((t+100)/200)*(end-start);
+    const tx=cx+(r+22)*Math.cos(a), ty=cy+(r+22)*Math.sin(a);
+    ticksSvg+=`<text x="${tx}" y="${ty}" fill="#1a8f1a" font-size="9" font-family="monospace" text-anchor="middle" dominant-baseline="middle">${t}</text>`;
+  });
+  svg.innerHTML = `
+    <g>${bands}${ticksSvg}
+      <circle cx="${cx}" cy="${cy}" r="6" fill="#001a00" stroke="#3dff3d" stroke-width="2"/>
+      <line id="needle" x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-r+18}" stroke="#b6ffb6" stroke-width="3" stroke-linecap="round" style="transform-origin:${cx}px ${cy}px; transition: transform .5s cubic-bezier(.2,.9,.2,1);"/>
+    </g>`;
+}
+function setGaugeNeedle(score){
+  const needle=$('needle'); if(!needle) return;
+  const angleDeg = (clamp(score,-100,100)/100)*90; // -90..+90 deg from vertical (pointing up)
+  needle.style.transform = `rotate(${angleDeg}deg)`;
+  const call = score>=20?'BUY':score<=-20?'SELL':'NEUTRAL';
+  const el=$('gaugeCall'); el.textContent = call==='NEUTRAL' ? 'NEUTRAL' : call;
+  el.className = 'call '+call;
+  $('gaugeScore').textContent = `composite score ${score>0?'+':''}${score} / 100`;
+}
+
+/* ---------------- render ---------------- */
+function highlightLevels(px){
+  document.querySelectorAll('.lvl').forEach(el=>el.classList.remove('on'));
+  const L=LEVELS;
+  if(px<L.inv) document.querySelector('[data-k=inv]')?.classList.add('on');
+  else if(px>=L.buyL && px<=L.buyH) document.querySelector('[data-k=buy]')?.classList.add('on');
+  else if(px>=L.breakout && px<L.confirm) document.querySelector('[data-k=bo]')?.classList.add('on');
+  else if(px>=L.confirm && px<L.t1) document.querySelector('[data-k=cf]')?.classList.add('on');
+  else if(px>=L.t1 && px<L.t2) document.querySelector('[data-k=t1]')?.classList.add('on');
+  else if(px>=L.t2) document.querySelector('[data-k=t2]')?.classList.add('on');
+}
+function render(){
+  if(!state.candles.length) return;
+  const last=state.candles.at(-1);
+  if(state.lastPrice==null) $('price').textContent=fmt(last.close);
+  $('zone').textContent=state.zoneSig?state.zoneSig.code:'—';
+  $('rsi').textContent=state.rsi.at(-1)!=null?state.rsi.at(-1).toFixed(1):'—';
+  $('cci').textContent=state.cci.at(-1)!=null?state.cci.at(-1).toFixed(1):'—';
+  $('atrv').textContent=state.atr.at(-1)!=null?fmt(state.atr.at(-1)):'—';
+  $('macdv').textContent=state.macdHist.at(-1)!=null?state.macdHist.at(-1).toFixed(5):'—';
+  $('ema9v').textContent=state.ema.at(-1)!=null?fmt(state.ema.at(-1)):'—';
+  $('compv').textContent=(state.composite>0?'+':'')+state.composite;
+  highlightLevels(last.close);
+  setGaugeNeedle(state.composite);
+
+  const card=$('chartCard'), entryCard=$('entryCard'), hero=$('hero'), pill=$('pill');
+  card.classList.remove('buy','sell'); entryCard.classList.remove('buy','sell');
+  if(state.signal){
+    const s=state.signal;
+    card.classList.add(s.dir==='BUY'?'buy':'sell');
+    entryCard.classList.add(s.dir==='BUY'?'buy':'sell');
+    hero.className='entry-hero';
+    pill.className='pill '+s.dir; pill.textContent=s.dir;
+    $('src').textContent=s.source;
+    $('why').textContent=state.zoneSig?state.zoneSig.text:'Setup active.';
+    $('entry').textContent=fmt(s.entry); $('sl').textContent=fmt(s.sl); $('tp').textContent=fmt(s.tp);
+    $('rrstr').textContent=(isFinite(s.rr)?s.rr.toFixed(2):'—')+' / '+s.strength;
+    const risk=Math.abs(s.entry-s.sl), reward=Math.abs(s.tp-s.entry);
+    $('plan').innerHTML = s.dir==='BUY'
+      ? `<b>LONG_PLAN:</b> buy ${fmt(s.entry)} · stop ${fmt(s.sl)} (${fmt(risk)}) · target ${fmt(s.tp)} (${fmt(reward)}).`
+      : `<b>SHORT_EXIT_PLAN:</b> sell ${fmt(s.entry)} · invalid above ${fmt(s.sl)} · cover ${fmt(s.tp)}.`;
+  } else {
+    const code=state.zoneSig?.code||'WAIT';
+    hero.className='entry-hero wait';
+    pill.className='pill '+(code==='NO_CHASE'?'NO_CHASE':'WAIT');
+    pill.textContent=code==='NO_CHASE'?'NO_CHASE':'WAIT';
+    $('src').textContent='flat';
+    $('why').textContent=state.zoneSig?state.zoneSig.text:'No edge.';
+    $('entry').textContent='—'; $('sl').textContent='—'; $('tp').textContent='—'; $('rrstr').textContent='—';
+    $('plan').textContent='NO TRADE.';
+  }
+  $('hist').innerHTML = state.history.length ? state.history.map(h=>`
+    <div class="row"><div class="d ${h.dir}">${h.dir}</div><div>${fmt(h.entry)} → ${fmt(h.tp)}<br><span style="color:var(--dim)">${h.src}</span></div><div>${h.t}<br>SL ${fmt(h.sl)}</div></div>
+  `).join('') : '<div style="color:var(--dim);font-size:11px">NONE_YET</div>';
+  drawChart();
+}
+
+/* ---------------- chart canvas ---------------- */
+function drawChart(){
+  const canvas=$('canvas'), ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+  const candles=state.candles, emaArr=state.ema; if(!emaArr||emaArr.length<2) return;
+  const visible=110, start=Math.max(0,emaArr.length-visible);
+  const sliceC=candles.slice(start), sliceE=emaArr.slice(start);
+  const projI=state.signal&&isFinite(state.signal.projIndex)?state.signal.projIndex:null;
+  const maxI=projI!=null?Math.max(emaArr.length-1,projI):emaArr.length-1;
+  const span=Math.max(1,maxI-start);
+  let lo=Math.min(...sliceC.map(c=>c.low),...sliceE.filter(isFinite));
+  let hi=Math.max(...sliceC.map(c=>c.high),...sliceE.filter(isFinite));
+  if(useLevelsEl.checked){lo=Math.min(lo,LEVELS.inv); hi=Math.max(hi,LEVELS.t2)}
+  if(state.signal){lo=Math.min(lo,state.signal.tp,state.signal.sl,state.signal.entry); hi=Math.max(hi,state.signal.tp,state.signal.sl,state.signal.entry)}
+  const pad=(hi-lo)*0.12||0.02; lo-=pad; hi+=pad; const range=(hi-lo)||1;
+  const x=i=>((i-start)/span)*(W-16)+8; const y=v=>H-((v-lo)/range)*(H-16)-8;
+  const ok=(...v)=>v.every(n=>typeof n==='number'&&isFinite(n));
+  ctx.strokeStyle='#062006';
+  for(let g=0;g<6;g++){const gy=H*(g/5); ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke()}
+  if(useLevelsEl.checked){
+    [[LEVELS.inv,'#ff3333'],[LEVELS.buyL,'#00ff66'],[LEVELS.buyH,'#00ff66'],[LEVELS.breakout,'#c8ff00'],[LEVELS.confirm,'#c8ff00'],[LEVELS.t1,'#00ff9c'],[LEVELS.t2,'#00ff9c']].forEach(([p,col])=>{
+      const py=y(p); if(!ok(py))return; ctx.strokeStyle=col; ctx.globalAlpha=.4; ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.moveTo(0,py); ctx.lineTo(W,py); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+    });
+  }
+  const cw=Math.max(2,(W/span)*0.52);
+  sliceC.forEach((c,i)=>{
+    const idx=start+i,cx=x(idx),up=c.close>=c.open;
+    ctx.strokeStyle=ctx.fillStyle=up?'#00ff66':'#ff3333';
+    ctx.beginPath(); ctx.moveTo(cx,y(c.high)); ctx.lineTo(cx,y(c.low)); ctx.stroke();
+    ctx.fillRect(cx-cw/2,Math.min(y(c.open),y(c.close)),cw,Math.max(1,Math.abs(y(c.close)-y(c.open))));
+  });
+  ctx.strokeStyle='#b6ffb6'; ctx.lineWidth=1.6;
   ctx.beginPath();
-  for(let x=0;x<w;x++){
-    const nx = x/w;
-    const y = h/2
-      + Math.sin(nx*24 + t)*10*devicePixelRatio*Math.sin(nx*Math.PI)
-      + Math.sin(nx*7 + t*0.5)*6*devicePixelRatio;
-    if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  sliceE.forEach((v,i)=>{const idx=start+i; i===0?ctx.moveTo(x(idx),y(v)):ctx.lineTo(x(idx),y(v))}); ctx.stroke();
+  if(state.signal && state.signal.p1 && projI!=null){
+    const {p1,p2,tp,sl,entry,dir}=state.signal; const col=dir==='SELL'?'#ff6666':'#00ff9c';
+    [p1,p2].forEach(p=>{const px=x(p.index),py=y(p.price); if(!ok(px,py))return; ctx.fillStyle=col; ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2); ctx.fill()});
+    const line=(v,c)=>{const py=y(v); if(!ok(py))return; ctx.strokeStyle=c; ctx.setLineDash([6,3]); ctx.beginPath(); ctx.moveTo(0,py); ctx.lineTo(W,py); ctx.stroke(); ctx.setLineDash([])};
+    line(entry,'#ff8b96'); line(sl,'#ff3333'); line(tp,'#00ff9c');
   }
-  const grad = ctx.createLinearGradient(0,0,w,0);
-  grad.addColorStop(0,"#3B82F6");
-  grad.addColorStop(0.5,"#2FE0D8");
-  grad.addColorStop(1,"#3FE07A");
-  ctx.strokeStyle = grad;
-  ctx.lineWidth = 2*devicePixelRatio;
-  ctx.stroke();
-  t += 0.05;
-  requestAnimationFrame(drawPulse);
 }
-drawPulse();
-</script>
 
-// ---- ledger pulse canvas ----
-const canvas = document.getElementById('pulseCanvas');
-const ctx = canvas.getContext('2d');
-function resize(){
-  canvas.width = canvas.clientWidth * devicePixelRatio;
-  canvas.height = canvas.clientHeight * devicePixelRatio;
-}
-resize();
-window.addEventListener('resize', resize);
-
-let t = 0;
-function drawPulse(){
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0,0,w,h);
-  ctx.beginPath();
-  for(let x=0;x<w;x++){
-    const nx = x/w;
-    const y = h/2
-      + Math.sin(nx*24 + t)*10*devicePixelRatio*Math.sin(nx*Math.PI)
-      + Math.sin(nx*7 + t*0.5)*6*devicePixelRatio;
-    if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-  }
-  const grad = ctx.createLinearGradient(0,0,w,0);
-  grad.addColorStop(0,"#3B82F6");
-  grad.addColorStop(0.5,"#2FE0D8");
-  grad.addColorStop(1,"#3FE07A");
-  ctx.strokeStyle = grad;
-  ctx.lineWidth = 2*devicePixelRatio;
-  ctx.stroke();
-  t += 0.05;
-  requestAnimationFrame(drawPulse);
-}
-drawPulse();
+buildGaugeStatic();
+loadHistory();
 </script>
 </body>
 </html>
