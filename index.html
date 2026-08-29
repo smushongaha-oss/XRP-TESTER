@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XRP // MATRIX SIGNAL DESK</title>
+<title>DERIV VOL INDEX // MATRIX SIGNAL DESK</title>
 <style>
   :root{
     --bg:#000000;
@@ -55,6 +55,7 @@
     background:#001a00;color:var(--buy);border:1px solid var(--line);
     padding:5px 7px;font-family:var(--mono);font-size:11px;
   }
+  select option:disabled{color:#3a5a3a}
   button{
     background:#001a00;color:var(--buy);border:1px solid var(--mute);
     padding:5px 12px;cursor:pointer;font-family:var(--mono);font-size:11px;
@@ -74,8 +75,6 @@
   .m{background:#001400;border:1px solid var(--line);padding:9px}
   .m span{display:block;color:var(--dim);font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
   .m b{font-size:13px;color:var(--buy)}
-
-  /* Gauge */
   .gaugeWrap{display:flex;flex-direction:column;align-items:center;padding:6px 4px 2px}
   .gaugeLabel{display:flex;justify-content:space-between;width:100%;font-size:9px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
   .gaugeReadout{text-align:center;margin-top:2px}
@@ -84,7 +83,6 @@
   .gaugeReadout .call.SELL{color:var(--sell)}
   .gaugeReadout .call.NEUTRAL{color:var(--amber)}
   .gaugeReadout .score{font-size:10px;color:var(--dim);margin-top:2px}
-
   .entry-hero{padding:14px;border:1px solid var(--line);background:#001000;margin-bottom:12px}
   .dir{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
   .pill{font-size:12px;font-weight:900;letter-spacing:.14em;padding:6px 10px;border:1px solid var(--dim)}
@@ -114,26 +112,68 @@
 <div class="shell">
 <header>
   <div class="brand">
-    <div class="logo">XR</div>
-    <h1>XRP Matrix Desk<small>// binance spot · xrpusdt · chart + gauge, unified</small></h1>
+    <div class="logo">VX</div>
+    <h1>Deriv Vol Index Desk<small>// deriv public feed · synthetic index · chart + gauge</small></h1>
   </div>
   <div class="livebox">
     <span class="dot" id="dot"></span>
     <span id="statusText">connecting</span>
     <span class="px" id="price">—</span>
-    <span class="chg" id="chg24">—</span>
+    <span class="chg" id="chgSession" title="change across currently loaded candle window">—</span>
   </div>
 </header>
 
 <div class="controls">
+  <label>INDEX <span style="color:var(--dim);font-size:9px">(live-checked)</span>
+    <select id="symbol">
+      <optgroup label="Volatility (2s)">
+        <option value="R_10">Volatility 10</option>
+        <option value="R_25">Volatility 25</option>
+        <option value="R_50">Volatility 50</option>
+        <option value="R_75" selected>Volatility 75</option>
+        <option value="R_100">Volatility 100</option>
+      </optgroup>
+      <optgroup label="Volatility (1s)">
+        <option value="1HZ10V">Volatility 10 (1s)</option>
+        <option value="1HZ15V">Volatility 15 (1s)</option>
+        <option value="1HZ25V">Volatility 25 (1s)</option>
+        <option value="1HZ30V">Volatility 30 (1s)</option>
+        <option value="1HZ50V">Volatility 50 (1s)</option>
+        <option value="1HZ75V">Volatility 75 (1s)</option>
+        <option value="1HZ90V">Volatility 90 (1s)</option>
+        <option value="1HZ100V">Volatility 100 (1s)</option>
+        <option value="1HZ150V">Volatility 150 (1s)</option>
+        <option value="1HZ250V">Volatility 250 (1s)</option>
+      </optgroup>
+      <optgroup label="Boom / Crash">
+        <option value="BOOM300">Boom 300</option>
+        <option value="BOOM500">Boom 500</option>
+        <option value="BOOM1000">Boom 1000</option>
+        <option value="CRASH300">Crash 300</option>
+        <option value="CRASH500">Crash 500</option>
+        <option value="CRASH1000">Crash 1000</option>
+      </optgroup>
+      <optgroup label="Jump">
+        <option value="JD10">Jump 10</option>
+        <option value="JD25">Jump 25</option>
+        <option value="JD50">Jump 50</option>
+        <option value="JD75">Jump 75</option>
+        <option value="JD100">Jump 100</option>
+      </optgroup>
+      <optgroup label="Range Break">
+        <option value="RDBULL">Range Break 100</option>
+        <option value="RDBEAR">Range Break 200</option>
+      </optgroup>
+    </select>
+  </label>
   <label>TF
     <select id="interval">
-      <option value="1m">M1</option>
-      <option value="5m" selected>M5</option>
-      <option value="15m">M15</option>
-      <option value="1h">H1</option>
-      <option value="4h">H4</option>
-      <option value="1d">D1</option>
+      <option value="60">M1</option>
+      <option value="300" selected>M5</option>
+      <option value="900">M15</option>
+      <option value="3600">H1</option>
+      <option value="14400">H4</option>
+      <option value="86400">D1</option>
     </select>
   </label>
   <label>PROJ ×<input id="projMult" type="number" value="2.0" step="0.1" min="1.2" max="4" style="width:58px"></label>
@@ -154,7 +194,7 @@
       <div class="m"><span>ATR 14</span><b id="atrv">—</b></div>
       <div class="m"><span>MACD hist</span><b id="macdv">—</b></div>
       <div class="m"><span>EMA9</span><b id="ema9v">—</b></div>
-      <div class="m"><span>24h Vol</span><b id="volv">—</b></div>
+      <div class="m"><span>Index</span><b id="volv">—</b></div>
       <div class="m"><span>Composite</span><b id="compv">—</b></div>
     </div>
   </section>
@@ -179,7 +219,7 @@
           <span class="pill WAIT" id="pill">WAIT</span>
           <span id="src" style="font-size:10px;color:var(--dim)">no_setup</span>
         </div>
-        <div class="why" id="why">Awaiting Trend-Fan break or XRP swing zone…</div>
+        <div class="why" id="why">Awaiting Trend-Fan break or index swing zone…</div>
       </div>
       <div class="stack">
         <div class="kv"><i>Entry</i><em id="entry">—</em></div>
@@ -191,14 +231,14 @@
     </section>
 
     <section class="card" style="margin-top:12px">
-      <h2>// swing_map</h2>
+      <h2>// swing_map <span style="color:var(--dim);font-weight:400;letter-spacing:0;text-transform:none">(auto, last 150 bars)</span></h2>
       <div class="levels">
-        <div class="lvl" data-k="inv"><span>INVALIDATION</span><b>1.28</b></div>
-        <div class="lvl" data-k="buy"><span>DIP BUY</span><b>1.35 – 1.39</b></div>
-        <div class="lvl" data-k="bo"><span>BREAKOUT</span><b>1.50</b></div>
-        <div class="lvl" data-k="cf"><span>CONFIRM</span><b>1.55</b></div>
-        <div class="lvl" data-k="t1"><span>TARGET_1</span><b>1.65</b></div>
-        <div class="lvl" data-k="t2"><span>TARGET_2</span><b>1.70</b></div>
+        <div class="lvl" data-k="inv"><span>INVALIDATION</span><b id="lvlInv">—</b></div>
+        <div class="lvl" data-k="buy"><span>DIP BUY</span><b id="lvlBuy">—</b></div>
+        <div class="lvl" data-k="bo"><span>BREAKOUT</span><b id="lvlBo">—</b></div>
+        <div class="lvl" data-k="cf"><span>CONFIRM</span><b id="lvlCf">—</b></div>
+        <div class="lvl" data-k="t1"><span>TARGET_1</span><b id="lvlT1">—</b></div>
+        <div class="lvl" data-k="t2"><span>TARGET_2</span><b id="lvlT2">—</b></div>
       </div>
     </section>
 
@@ -208,15 +248,14 @@
     </section>
   </aside>
 </div>
-<footer>// MATRIX_THEME · BINANCE_PUBLIC_FEED · EDUCATIONAL_ONLY · NOT FINANCIAL ADVICE</footer>
+<footer>// MATRIX_THEME · DERIV_PUBLIC_FEED (app_id 1089, no login) · SYNTHETIC INDEX · EDUCATIONAL_ONLY · NOT FINANCIAL ADVICE</footer>
 </div>
 
 <script>
-/* ---------------- matrix rain bg ---------------- */
 (function(){
   const c=document.getElementById('matrixRain'), ctx=c.getContext('2d');
   let w,h,cols,drops;
-  const chars='アイウエオカキクケコ01XRP$<>/|=*+';
+  const chars='アイウエオカキクケコ01V75DRV$<>/|=*+';
   function resize(){
     w=c.width=innerWidth; h=c.height=innerHeight;
     cols=Math.floor(w/14); drops=Array.from({length:cols},()=>Math.random()*h/14);
@@ -234,65 +273,84 @@
   })();
 })();
 
-/* ---------------- state / config ---------------- */
-const SYM='XRPUSDT';
-const REST='https://api.binance.com';
-const WS='wss://stream.binance.com:9443/ws';
-const LEVELS={inv:1.28,buyL:1.35,buyH:1.39,breakout:1.50,confirm:1.55,t1:1.65,t2:1.70};
+const DERIV_WS_URL='wss://ws.derivws.com/websockets/v3?app_id=1089';
+let LEVELS={inv:0,buyL:0,buyH:0,breakout:0,confirm:0,t1:0,t2:0};
 const state={candles:[],ema:[],cci:[],atr:[],rsi:[],macdHist:[],signal:null,zoneSig:null,lastPrice:null,history:[],composite:0};
-let klineWs=null,tradeWs=null,tickerWs=null,lastPrintKey='';
+let derivWs=null,reqId=1,lastPrintKey='',tickRecomputeTimer=null;
 const $=id=>document.getElementById(id);
-const intervalEl=$('interval'), projMultEl=$('projMult'), cciThreshEl=$('cciThresh'), slBufEl=$('slBuf'), useLevelsEl=$('useLevels');
-function fmt(n){if(n==null||!isFinite(n))return '—'; return n>=10?n.toFixed(3):n.toFixed(4)}
-
-/* ---------------- data load / streams ---------------- */
-async function loadHistory(){
-  $('statusText').textContent='loading';
-  try{
-    const res=await fetch(`${REST}/api/v3/klines?symbol=${SYM}&interval=${intervalEl.value}&limit=280`);
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const raw=await res.json();
-    state.candles=raw.map(k=>({epoch:Math.floor(k[0]/1000),open:+k[1],high:+k[2],low:+k[3],close:+k[4]}));
-    recompute(); connectStreams();
-  }catch(e){
-    $('statusText').textContent='REST_ERROR';
-    setTimeout(loadHistory,5000);
-  }
+const intervalEl=$('interval'), projMultEl=$('projMult'), cciThreshEl=$('cciThresh'), slBufEl=$('slBuf'), useLevelsEl=$('useLevels'), symEl=$('symbol');
+function fmt(n){
+  if(n==null||!isFinite(n))return '—';
+  if(n>=1000) return n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(n>=10) return n.toFixed(3);
+  return n.toFixed(4);
 }
-function closeStreams(){[klineWs,tradeWs,tickerWs].forEach(w=>{try{w&&w.close()}catch(e){}})}
+
+function resetDeskState(){
+  state.candles=[]; state.ema=[]; state.cci=[]; state.atr=[]; state.rsi=[]; state.macdHist=[];
+  state.signal=null; state.zoneSig=null; state.lastPrice=null; state.history=[]; state.composite=0;
+  lastPrintKey='';
+}
+
+function closeStreams(){
+  try{ if(derivWs){ derivWs.onclose=null; derivWs.close(); } }catch(e){}
+  derivWs=null;
+}
 function connectStreams(){
   closeStreams();
-  const iv=intervalEl.value;
-  klineWs=new WebSocket(`${WS}/${SYM.toLowerCase()}@kline_${iv}`);
-  klineWs.onopen=()=>{$('dot').classList.add('on');$('statusText').textContent='LIVE_'+iv.toUpperCase()};
-  klineWs.onclose=()=>{$('dot').classList.remove('on');$('statusText').textContent='RECONNECT';setTimeout(()=>{if(!document.hidden)connectStreams()},4000)};
-  klineWs.onmessage=ev=>{
-    const k=JSON.parse(ev.data).k; if(!k) return;
-    const c={epoch:Math.floor(k.t/1000),open:+k.o,high:+k.h,low:+k.l,close:+k.c};
-    const last=state.candles.at(-1);
-    if(last&&last.epoch===c.epoch) state.candles[state.candles.length-1]=c;
-    else {state.candles.push(c); if(state.candles.length>320) state.candles.shift()}
-    state.lastPrice=c.close; $('price').textContent=fmt(c.close); recompute();
+  $('statusText').textContent='loading';
+  const sym=symEl.value, gran=+intervalEl.value;
+  derivWs=new WebSocket(DERIV_WS_URL);
+  derivWs.onopen=()=>{
+    $('dot').classList.add('on'); $('statusText').textContent='LIVE_'+intervalEl.options[intervalEl.selectedIndex].text;
+    derivWs.send(JSON.stringify({
+      ticks_history:sym, adjust_start_time:1, count:280, end:'latest',
+      style:'candles', granularity:gran, subscribe:1, req_id:reqId++
+    }));
+    derivWs.send(JSON.stringify({ticks:sym, subscribe:1, req_id:reqId++}));
   };
-  tradeWs=new WebSocket(`${WS}/${SYM.toLowerCase()}@aggTrade`);
-  tradeWs.onmessage=ev=>{
-    const p=+JSON.parse(ev.data).p; if(!isFinite(p)) return;
-    state.lastPrice=p; $('price').textContent=fmt(p);
-    if(state.candles.length){const last=state.candles.at(-1); last.close=p; last.high=Math.max(last.high,p); last.low=Math.min(last.low,p)}
-  };
-  tickerWs=new WebSocket(`${WS}/${SYM.toLowerCase()}@ticker`);
-  tickerWs.onmessage=ev=>{
-    const d=JSON.parse(ev.data);
-    const pct=+d.P; const el=$('chg24');
-    el.textContent=(pct>=0?'+':'')+pct.toFixed(2)+'%'; el.className='chg '+(pct>=0?'up':'dn');
-    const vol=+d.v; $('volv').textContent=isFinite(vol)?(vol/1e6).toFixed(1)+'M':'—';
+  derivWs.onclose=()=>{$('dot').classList.remove('on');$('statusText').textContent='RECONNECT';setTimeout(()=>{if(!document.hidden)connectStreams()},4000)};
+  derivWs.onerror=()=>{$('statusText').textContent='WS_ERROR'};
+  derivWs.onmessage=ev=>{
+    let msg; try{ msg=JSON.parse(ev.data); }catch(e){ return; }
+    if(msg.error){
+      $('statusText').textContent='DERIV_ERR: '+msg.error.message;
+      if((msg.error.code==='InvalidSymbol' || /invalid/i.test(msg.error.message||'')) && sym!=='R_75'){
+        const hasR75=[...symEl.options].some(o=>o.value==='R_75' && !o.disabled);
+        symEl.value = hasR75 ? 'R_75' : ([...symEl.options].find(o=>!o.disabled)?.value || 'R_75');
+        $('statusText').textContent='FALLBACK_TO_'+symEl.value;
+        setTimeout(()=>{ closeStreams(); resetDeskState(); connectStreams(); }, 300);
+      }
+      return;
+    }
+    if(msg.msg_type==='candles' && Array.isArray(msg.candles)){
+      state.candles = msg.candles.map(c=>({epoch:c.epoch,open:+c.open,high:+c.high,low:+c.low,close:+c.close}));
+      recompute();
+    } else if(msg.msg_type==='ohlc' && msg.ohlc){
+      const o=msg.ohlc;
+      const c={epoch:+o.open_time, open:+o.open, high:+o.high, low:+o.low, close:+o.close};
+      const last=state.candles.at(-1);
+      if(last && last.epoch===c.epoch) state.candles[state.candles.length-1]=c;
+      else { state.candles.push(c); if(state.candles.length>320) state.candles.shift(); }
+      state.lastPrice=c.close; $('price').textContent=fmt(c.close);
+      recompute();
+    } else if(msg.msg_type==='tick' && msg.tick){
+      const p=+msg.tick.quote; if(!isFinite(p)) return;
+      state.lastPrice=p; $('price').textContent=fmt(p);
+      if(state.candles.length){ const last=state.candles.at(-1); last.close=p; last.high=Math.max(last.high,p); last.low=Math.min(last.low,p); }
+      if(!tickRecomputeTimer){
+        tickRecomputeTimer=setTimeout(()=>{ tickRecomputeTimer=null; recompute(); }, 250);
+      }
+    }
   };
 }
-$('btnRefresh').onclick=()=>{closeStreams(); state.candles=[]; loadHistory()};
-intervalEl.onchange=()=>$('btnRefresh').click();
+function loadHistory(){ connectStreams(); }
+function hardReload(){ closeStreams(); resetDeskState(); loadHistory(); }
+$('btnRefresh').onclick=hardReload;
+intervalEl.onchange=hardReload;
+symEl.onchange=hardReload;
 useLevelsEl.onchange=()=>recompute();
 
-/* ---------------- indicators ---------------- */
 function ema(v,p){const k=2/(p+1),o=[]; v.forEach((x,i)=>o.push(i===0?x:x*k+o[i-1]*(1-k))); return o}
 function cci(candles,p){
   const tp=candles.map(c=>(c.high+c.low+c.close)/3), out=Array(candles.length).fill(null);
@@ -327,24 +385,48 @@ function findPivots(emaArr,lb,minBars,minSize){
   const highs=[],lows=[];
   for(let i=lb;i<emaArr.length-lb;i++){
     const w=emaArr.slice(i-lb,i+lb+1);
-    if(emaArr[i]===Math.max(...w)) highs.push({index:i,price:emaArr[i]});
-    if(emaArr[i]===Math.min(...w)) lows.push({index:i,price:emaArr[i]});
+    const mx=Math.max(...w), mn=Math.min(...w);
+    if(emaArr[i]>=mx-1e-12) highs.push({index:i,price:emaArr[i]});
+    if(emaArr[i]<=mn+1e-12) lows.push({index:i,price:emaArr[i]});
   }
   const clean=arr=>{if(arr.length<2)return arr; const o=[arr[0]]; for(let i=1;i<arr.length;i++){const p=o.at(-1); if(arr[i].index-p.index>=minBars && Math.abs(arr[i].price-p.price)>=minSize) o.push(arr[i])} return o};
   return {highs:clean(highs),lows:clean(lows)};
 }
-function xrpZone(price,rsiV){
-  const L=LEVELS;
-  if(price<L.inv) return {code:'EXIT',text:'Lost 1.28 structure.'};
+function computeAutoLevels(candles,atrVal){
+  const lookback=Math.min(150,candles.length);
+  const recent=candles.slice(-lookback);
+  const swingHigh=Math.max(...recent.map(c=>c.high));
+  const swingLow=Math.min(...recent.map(c=>c.low));
+  const rng=Math.max(swingHigh-swingLow, atrVal*4);
+  const buf=atrVal||rng*0.02;
+  return {
+    inv: swingLow - buf,
+    buyL: swingLow,
+    buyH: swingLow + rng*0.15,
+    breakout: swingHigh,
+    confirm: swingHigh + buf*0.5,
+    t1: swingHigh + rng*0.15,
+    t2: swingHigh + rng*0.30
+  };
+}
+function priceZone(price,rsiV,L){
+  if(price<L.inv) return {code:'EXIT',text:`Lost swing-low structure (${fmt(L.inv)}).`};
   if(rsiV!=null && rsiV>=70 && price>=L.breakout) return {code:'NO_CHASE',text:'Overbought. Do not buy strength.'};
-  if(price>=L.confirm) return {code:'BUY_BREAK',text:'Confirmed above 1.55.'};
-  if(price>=L.breakout) return {code:'WATCH_BO',text:'Testing 1.50.'};
-  if(price>=L.buyL && price<=L.buyH) return {code:'BUY_DIP',text:'Dip-buy pocket 1.35–1.39.'};
-  if(price<L.buyL) return {code:'WAIT_FLOOR',text:'Between 1.28 and 1.35.'};
+  if(price>=L.confirm) return {code:'BUY_BREAK',text:`Confirmed above ${fmt(L.confirm)}.`};
+  if(price>=L.breakout) return {code:'WATCH_BO',text:`Testing swing high ${fmt(L.breakout)}.`};
+  if(price>=L.buyL && price<=L.buyH) return {code:'BUY_DIP',text:`Dip-buy pocket ${fmt(L.buyL)}–${fmt(L.buyH)}.`};
+  if(price<L.buyL) return {code:'WAIT_FLOOR',text:`Between invalidation and swing low.`};
   return {code:'MID',text:'Mid-range. No forced trade.'};
 }
+function renderLevels(L){
+  $('lvlInv').textContent=fmt(L.inv);
+  $('lvlBuy').textContent=fmt(L.buyL)+' – '+fmt(L.buyH);
+  $('lvlBo').textContent=fmt(L.breakout);
+  $('lvlCf').textContent=fmt(L.confirm);
+  $('lvlT1').textContent=fmt(L.t1);
+  $('lvlT2').textContent=fmt(L.t2);
+}
 
-/* ---------------- composite gauge score (-100 sell .. +100 buy) ---------------- */
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function computeComposite(lastRsi,lastCci,lastMacdHist,atrVal){
   const rsiScore = lastRsi!=null ? clamp((lastRsi-50)*2.2, -100,100) : 0;
@@ -353,7 +435,6 @@ function computeComposite(lastRsi,lastCci,lastMacdHist,atrVal){
   return Math.round(rsiScore*0.4 + cciScore*0.35 + macdScore*0.25);
 }
 
-/* ---------------- main recompute ---------------- */
 function recompute(){
   if(state.candles.length<70) return;
   const closes=state.candles.map(c=>c.close);
@@ -362,8 +443,12 @@ function recompute(){
   const i=closes.length-1, px=closes[i], lastCci=state.cci[i], lastAtr=state.atr[i]||0, lastRsi=state.rsi[i], lastMacdHist=state.macdHist[i];
   if(!lastAtr) return;
   const proj=+projMultEl.value, thr=+cciThreshEl.value, slBuf=+slBufEl.value;
-  const iv=intervalEl.value, minBars=(iv==='1m'||iv==='5m')?5:4, minSize=lastAtr*((iv==='1m'||iv==='5m')?0.40:0.35);
+  const iv=+intervalEl.value;
+  const fast=iv<=300;
+  const minBars=fast?5:4, minSize=lastAtr*(fast?0.40:0.35);
   const {highs,lows}=findPivots(state.ema,4,minBars,minSize);
+  LEVELS=computeAutoLevels(state.candles,lastAtr);
+  renderLevels(LEVELS);
   let signal=null;
   if(highs.length>=2){
     const p2=highs.at(-1), p1=highs.at(-2);
@@ -395,25 +480,25 @@ function recompute(){
       }
     }
   }
-  const zone=xrpZone(px,lastRsi); state.zoneSig=zone;
+  const zone=priceZone(px,lastRsi,LEVELS); state.zoneSig=zone;
   if(useLevelsEl.checked){
     if(zone.code==='EXIT'){
-      signal={dir:'SELL',entry:px,sl:px+1.2*lastAtr,tp:LEVELS.inv-lastAtr,p1:{index:i-5,price:px},p2:{index:i,price:px},projIndex:i+8,rr:1.5,strength:70,source:'XRP invalidation'};
+      signal={dir:'SELL',entry:px,sl:px+1.2*lastAtr,tp:LEVELS.inv-lastAtr,p1:{index:i-5,price:px},p2:{index:i,price:px},projIndex:i+8,rr:1.5,strength:70,source:'Index invalidation'};
     } else if(zone.code==='NO_CHASE' && (!signal || signal.dir==='BUY')){
       signal=null;
     } else if(zone.code==='BUY_DIP' && !signal){
       const sl=Math.min(LEVELS.inv, px-slBuf*lastAtr);
-      signal={dir:'BUY',entry:px,sl,tp:LEVELS.breakout,p1:{index:i-8,price:LEVELS.buyL},p2:{index:i,price:px},projIndex:i+12,rr:(LEVELS.breakout-px)/Math.max(1e-9,px-sl),strength:62,source:'XRP dip zone'};
+      signal={dir:'BUY',entry:px,sl,tp:LEVELS.breakout,p1:{index:i-8,price:LEVELS.buyL},p2:{index:i,price:px},projIndex:i+12,rr:(LEVELS.breakout-px)/Math.max(1e-9,px-sl),strength:62,source:'Index dip zone'};
     } else if(zone.code==='BUY_BREAK' && !signal){
       const sl=LEVELS.breakout-0.5*lastAtr;
-      signal={dir:'BUY',entry:px,sl,tp:LEVELS.t1,p1:{index:i-6,price:LEVELS.breakout},p2:{index:i,price:px},projIndex:i+10,rr:(LEVELS.t1-px)/Math.max(1e-9,px-sl),strength:68,source:'XRP breakout'};
+      signal={dir:'BUY',entry:px,sl,tp:LEVELS.t1,p1:{index:i-6,price:LEVELS.breakout},p2:{index:i,price:px},projIndex:i+10,rr:(LEVELS.t1-px)/Math.max(1e-9,px-sl),strength:68,source:'Index breakout'};
     }
   }
   state.signal=signal;
   state.composite=computeComposite(lastRsi,lastCci,lastMacdHist,lastAtr);
 
   if(signal){
-    const key=signal.dir+'|'+signal.source+'|'+intervalEl.value+'|'+Math.round(signal.entry*1000);
+    const key=signal.dir+'|'+signal.source+'|'+intervalEl.value+'|'+symEl.value+'|'+Math.round(signal.entry*1000);
     if(key!==lastPrintKey){
       lastPrintKey=key;
       state.history.unshift({t:new Date().toLocaleTimeString(),dir:signal.dir,entry:signal.entry,sl:signal.sl,tp:signal.tp,src:signal.source});
@@ -423,7 +508,6 @@ function recompute(){
   render();
 }
 
-/* ---------------- gauge SVG ---------------- */
 function buildGaugeStatic(){
   const svg=$('gaugeSvg');
   const cx=130, cy=130, r=105;
@@ -434,14 +518,11 @@ function buildGaugeStatic(){
     return `<path d="M ${p0.x} ${p0.y} A ${r} ${r} 0 ${large} 1 ${p1.x} ${p1.y}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>`;
   };
   const PI=Math.PI;
-  const start=PI, end=2*PI; // semicircle top half (180deg to 360deg maps left to right)
+  const start=PI, end=2*PI;
   const seg=(end-start)/5;
   const colors=['#ff3333','#ff8b3d','#f5c518','#7bdc4a','#00ff66'];
   let bands='';
-  for(let s=0;s<5;s++){
-    bands+=arc(start+seg*s, start+seg*(s+1), colors[s], 14);
-  }
-  // tick labels
+  for(let s=0;s<5;s++) bands+=arc(start+seg*s, start+seg*(s+1), colors[s], 14);
   const ticks=[-100,-50,0,50,100];
   let ticksSvg='';
   ticks.forEach(t=>{
@@ -452,20 +533,19 @@ function buildGaugeStatic(){
   svg.innerHTML = `
     <g>${bands}${ticksSvg}
       <circle cx="${cx}" cy="${cy}" r="6" fill="#001a00" stroke="#3dff3d" stroke-width="2"/>
-      <line id="needle" x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-r+18}" stroke="#b6ffb6" stroke-width="3" stroke-linecap="round" style="transform-origin:${cx}px ${cy}px; transition: transform .5s cubic-bezier(.2,.9,.2,1);"/>
+      <line id="needle" x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-r+18}" stroke="#b6ffb6" stroke-width="3" stroke-linecap="round"/>
     </g>`;
 }
 function setGaugeNeedle(score){
   const needle=$('needle'); if(!needle) return;
-  const angleDeg = (clamp(score,-100,100)/100)*90; // -90..+90 deg from vertical (pointing up)
-  needle.style.transform = `rotate(${angleDeg}deg)`;
+  const angleDeg = (clamp(score,-100,100)/100)*90;
+  needle.setAttribute('transform', `rotate(${angleDeg} 130 130)`);
   const call = score>=20?'BUY':score<=-20?'SELL':'NEUTRAL';
-  const el=$('gaugeCall'); el.textContent = call==='NEUTRAL' ? 'NEUTRAL' : call;
+  const el=$('gaugeCall'); el.textContent = call;
   el.className = 'call '+call;
   $('gaugeScore').textContent = `composite score ${score>0?'+':''}${score} / 100`;
 }
 
-/* ---------------- render ---------------- */
 function highlightLevels(px){
   document.querySelectorAll('.lvl').forEach(el=>el.classList.remove('on'));
   const L=LEVELS;
@@ -487,6 +567,14 @@ function render(){
   $('macdv').textContent=state.macdHist.at(-1)!=null?state.macdHist.at(-1).toFixed(5):'—';
   $('ema9v').textContent=state.ema.at(-1)!=null?fmt(state.ema.at(-1)):'—';
   $('compv').textContent=(state.composite>0?'+':'')+state.composite;
+  $('volv').textContent=symEl.options[symEl.selectedIndex].text.replace('Volatility ','V');
+  if(state.candles.length>1){
+    const first=state.candles[0].close, curr=last.close;
+    const pct=((curr-first)/first)*100;
+    const el=$('chgSession');
+    el.textContent=(pct>=0?'+':'')+pct.toFixed(2)+'% (window)';
+    el.className='chg '+(pct>=0?'up':'dn');
+  }
   highlightLevels(last.close);
   setGaugeNeedle(state.composite);
 
@@ -522,10 +610,20 @@ function render(){
   drawChart();
 }
 
-/* ---------------- chart canvas ---------------- */
+function sizeChartCanvas(){
+  const canvas=$('canvas');
+  const dpr=Math.max(1, window.devicePixelRatio||1);
+  const cssW=canvas.clientWidth||1100;
+  const cssH=canvas.clientHeight||420;
+  canvas.width=Math.round(cssW*dpr);
+  canvas.height=Math.round(cssH*dpr);
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,W:cssW,H:cssH};
+}
 function drawChart(){
-  const canvas=$('canvas'), ctx=canvas.getContext('2d');
-  const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+  const {ctx,W,H}=sizeChartCanvas();
+  ctx.clearRect(0,0,W,H);
   const candles=state.candles, emaArr=state.ema; if(!emaArr||emaArr.length<2) return;
   const visible=110, start=Math.max(0,emaArr.length-visible);
   const sliceC=candles.slice(start), sliceE=emaArr.slice(start);
@@ -564,9 +662,43 @@ function drawChart(){
     line(entry,'#ff8b96'); line(sl,'#ff3333'); line(tp,'#00ff9c');
   }
 }
+addEventListener('resize',()=>{ if(state.candles.length) drawChart(); });
+
+function loadSymbolList(){
+  $('statusText').textContent='loading_symbols';
+  const probe=new WebSocket(DERIV_WS_URL);
+  const fallback=setTimeout(()=>{ try{probe.close()}catch(e){} connectStreams(); }, 6000);
+  probe.onopen=()=>{ probe.send(JSON.stringify({active_symbols:'brief', req_id:reqId++})); };
+  probe.onerror=()=>{ clearTimeout(fallback); connectStreams(); };
+  probe.onmessage=ev=>{
+    let msg; try{ msg=JSON.parse(ev.data); }catch(e){ return; }
+    if(msg.error){ clearTimeout(fallback); try{probe.close()}catch(e){} connectStreams(); return; }
+    if(msg.msg_type==='active_symbols' && Array.isArray(msg.active_symbols)){
+      clearTimeout(fallback);
+      const activeSet = new Set(msg.active_symbols.map(s=>s.symbol));
+      const opts=[...symEl.querySelectorAll('option')];
+      let anyActive=false;
+      opts.forEach(o=>{
+        const isActive = activeSet.has(o.value);
+        o.disabled = !isActive;
+        o.textContent = o.textContent.replace(/ \(offline\)$/,'') + (isActive?'':' (offline)');
+        if(isActive) anyActive=true;
+      });
+      if(anyActive && symEl.selectedOptions[0]?.disabled){
+        const firstActive = opts.find(o=>!o.disabled);
+        if(firstActive) symEl.value = firstActive.value;
+      }
+      try{ probe.close(); }catch(e){}
+      connectStreams();
+    }
+  };
+}
 
 buildGaugeStatic();
-loadHistory();
+loadSymbolList();
 </script>
 </body>
 </html>
+
+
+
