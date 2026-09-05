@@ -166,31 +166,24 @@ function connect(){
         epoch: c.epoch
       }));
       ws.send(JSON.stringify({
-        ticks_history: SYMBOL,
-        adjust_start_time: 1,
-        end: "latest",
-        granularity: GRANULARITY,
-        style: "candles",
+        ticks: SYMBOL,
         subscribe: 1
       }));
       setConnState(true, 'live');
       recompute();
     }
 
-    if (data.msg_type === "ohlc") {
-      const c = data.ohlc;
-      const candle = {
-        open: parseFloat(c.open),
-        high: parseFloat(c.high),
-        low: parseFloat(c.low),
-        close: parseFloat(c.close),
-        epoch: c.open_time
-      };
+    if (data.msg_type === "tick") {
+      const price = parseFloat(data.tick.quote);
+      const epoch = data.tick.epoch;
+      const candleEpoch = Math.floor(epoch / GRANULARITY) * GRANULARITY;
       const last = candles[candles.length - 1];
-      if (last && last.epoch === candle.epoch) {
-        candles[candles.length - 1] = candle;
+      if (last && last.epoch === candleEpoch) {
+        last.high = Math.max(last.high, price);
+        last.low = Math.min(last.low, price);
+        last.close = price;
       } else {
-        candles.push(candle);
+        candles.push({ open: price, high: price, low: price, close: price, epoch: candleEpoch });
         if (candles.length > 300) candles.shift();
       }
       setConnState(true, 'live');
