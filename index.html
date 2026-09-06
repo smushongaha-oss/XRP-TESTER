@@ -131,6 +131,7 @@ let m1Candles = [];
 let subscribedTicks = false;
 let h1Zone = 'NEUTRAL';
 let m1Zone = 'NEUTRAL';
+let dataReceived = false;
 
 const statusDot = document.getElementById('statusDot');
 const statusText = document.getElementById('statusText');
@@ -153,7 +154,8 @@ function connect(){
     const data = JSON.parse(msg.data);
 
     if (data.error) {
-      setConnState(false, 'error: ' + data.error.message);
+      console.warn('API error:', data.error.message, data.echo_req);
+      if (!dataReceived) setConnState(false, 'error: ' + data.error.message);
       return;
     }
 
@@ -177,6 +179,7 @@ function connect(){
           subscribedTicks = true;
         }
       }
+      dataReceived = true;
       setConnState(true, 'live');
     }
 
@@ -201,6 +204,7 @@ function connect(){
   ws.onclose = () => {
     setConnState(false, 'reconnecting');
     subscribedTicks = false;
+    dataReceived = false;
     setTimeout(connect, 3000);
   };
 
